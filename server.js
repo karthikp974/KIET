@@ -471,20 +471,20 @@ app.post("/api/admin/chat/reply", requireAnyAdmin, async (req, res) => {
 
 app.get("/api/admin/updates", requireAnyAdmin, async (req, res) => {
   try {
-    const chatList = await store.listChatAll();
-    const totalUnread = chatList.filter((m) => m.role === "visitor" && !m.readByAdmin).length;
-    const analytics = await store.listAnalyticsAll();
-    const admissionsFull = await store.listAdmissionsAll();
-    const admissionsPartial = await store.listPartialsAll();
+    const chatUnread = await store.countChatUnread();
+    const analytics = await store.listAnalyticsTail(2500);
+    const admissionsFull = await store.listAdmissionsTail(500);
+    const admissionsPartial = await store.listPartialsTail(1500);
     res.json({
-      analytics: analytics.slice(-2500),
-      admissionsFull: admissionsFull.slice(-500),
-      admissionsPartial: admissionsPartial.slice(-1500),
-      chatUnread: totalUnread,
+      analytics,
+      admissionsFull,
+      admissionsPartial,
+      chatUnread,
     });
   } catch (e) {
-    console.error(e);
-    res.status(500).json({ error: "server" });
+    console.error("GET /api/admin/updates", e);
+    const msg = e && e.message ? String(e.message).slice(0, 250) : "server";
+    res.status(500).json({ error: msg });
   }
 });
 

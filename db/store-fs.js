@@ -83,6 +83,29 @@ async function listPartialsAll() {
   return Array.isArray(list) ? list : [];
 }
 
+async function listAnalyticsTail(n) {
+  const list = await listAnalyticsAll();
+  const lim = Math.min(10000, Math.max(1, Number(n) || 2500));
+  return list.slice(-lim);
+}
+
+async function listAdmissionsTail(n) {
+  const list = await listAdmissionsAll();
+  const lim = Math.min(10000, Math.max(1, Number(n) || 500));
+  return list.slice(-lim);
+}
+
+async function listPartialsTail(n) {
+  const list = await listPartialsAll();
+  const lim = Math.min(15000, Math.max(1, Number(n) || 1500));
+  return list.slice(-lim);
+}
+
+async function countChatUnread() {
+  const list = await listChatAll();
+  return list.filter((m) => m.role === "visitor" && !m.readByAdmin).length;
+}
+
 async function listChatAll() {
   const list = readJson(CHAT_FILE, []);
   return Array.isArray(list) ? list : [];
@@ -117,10 +140,14 @@ module.exports = {
   writeSite,
   appendAnalytics,
   listAnalyticsAll,
+  listAnalyticsTail,
   appendAdmission,
   listAdmissionsAll,
+  listAdmissionsTail,
   appendPartial,
   listPartialsAll,
+  listPartialsTail,
+  countChatUnread,
   listChatAll,
   appendChat,
   replaceChatAll,

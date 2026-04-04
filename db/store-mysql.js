@@ -162,6 +162,24 @@ async function listAnalyticsAll() {
   return rows.map(rowAnalytics);
 }
 
+/** Last N events (newest first in SQL, returned chronological) — avoids loading huge tables for admin dashboard. */
+async function listAnalyticsTail(n) {
+  const lim = Math.min(10000, Math.max(1, parseInt(String(n), 10) || 2500));
+  const [rows] = await getPool().execute(
+    "SELECT id, at, type, session_id, section, payload, ip, ua FROM analytics_events ORDER BY at DESC, id DESC LIMIT ?",
+    [lim]
+  );
+  const mapped = [];
+  for (let i = rows.length - 1; i >= 0; i--) {
+    try {
+      mapped.push(rowAnalytics(rows[i]));
+    } catch (e) {
+      console.error("listAnalyticsTail row", e);
+    }
+  }
+  return mapped;
+}
+
 async function appendAdmission(row) {
   const p = getPool();
   await p.execute(
@@ -193,6 +211,23 @@ async function listAdmissionsAll() {
   return rows.map(rowAdmission);
 }
 
+async function listAdmissionsTail(n) {
+  const lim = Math.min(10000, Math.max(1, parseInt(String(n), 10) || 500));
+  const [rows] = await getPool().execute(
+    "SELECT id, at, source, session_id, full_name, email, dob, stream, branch, phone, city, district, name FROM admissions ORDER BY at DESC, id DESC LIMIT ?",
+    [lim]
+  );
+  const mapped = [];
+  for (let i = rows.length - 1; i >= 0; i--) {
+    try {
+      mapped.push(rowAdmission(rows[i]));
+    } catch (e) {
+      console.error("listAdmissionsTail row", e);
+    }
+  }
+  return mapped;
+}
+
 async function appendPartial(row) {
   const p = getPool();
   await p.execute(
@@ -208,6 +243,30 @@ async function listPartialsAll() {
     "SELECT id, at, session_id, completion_percent, page, fields FROM admissions_partial ORDER BY at ASC, id ASC"
   );
   return rows.map(rowPartial);
+}
+
+async function listPartialsTail(n) {
+  const lim = Math.min(15000, Math.max(1, parseInt(String(n), 10) || 1500));
+  const [rows] = await getPool().execute(
+    "SELECT id, at, session_id, completion_percent, page, fields FROM admissions_partial ORDER BY at DESC, id DESC LIMIT ?",
+    [lim]
+  );
+  const mapped = [];
+  for (let i = rows.length - 1; i >= 0; i--) {
+    try {
+      mapped.push(rowPartial(rows[i]));
+    } catch (e) {
+      console.error("listPartialsTail row", e);
+    }
+  }
+  return mapped;
+}
+
+async function countChatUnread() {
+  const [rows] = await getPool().execute(
+    "SELECT COUNT(*) AS c FROM chat_messages WHERE role = 'visitor' AND read_by_admin = 0"
+  );
+  return Number(rows[0].c) || 0;
 }
 
 async function listChatAll() {
@@ -261,10 +320,14 @@ module.exports = {
   writeSite,
   appendAnalytics,
   listAnalyticsAll,
+  listAnalyticsTail,
   appendAdmission,
   listAdmissionsAll,
+  listAdmissionsTail,
   appendPartial,
   listPartialsAll,
+  listPartialsTail,
+  countChatUnread,
   listChatAll,
   appendChat,
   replaceChatAll,
