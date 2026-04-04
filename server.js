@@ -36,7 +36,7 @@ const upload = multer({
 
 const app = express();
 app.set("trust proxy", 1);
-app.use(express.json({ limit: "4mb" }));
+app.use(express.json({ limit: "16mb" }));
 app.use(cookieParser(COOKIE_SECRET));
 
 function csvEscapeCell(v) {
@@ -258,11 +258,16 @@ app.get("/api/site", async (req, res) => {
 
 app.put("/api/site", requireFullAdmin, async (req, res) => {
   try {
-    await store.writeSite(req.body);
+    const body = req.body;
+    if (body == null || typeof body !== "object" || Array.isArray(body)) {
+      return res.status(400).json({ error: "Invalid body: need a JSON object" });
+    }
+    await store.writeSite(body);
     res.json({ ok: true });
   } catch (e) {
-    console.error(e);
-    res.status(500).json({ error: "server" });
+    console.error("PUT /api/site", e);
+    const msg = e && e.message ? String(e.message).slice(0, 300) : "server";
+    res.status(500).json({ error: msg });
   }
 });
 

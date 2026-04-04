@@ -125,9 +125,15 @@ async function readSite() {
 
 async function writeSite(obj) {
   const json = JSON.stringify(obj, null, 2);
-  await getPool().execute("UPDATE site_config SET json_data = ?, updated_at = CURRENT_TIMESTAMP(3) WHERE id = 1", [
-    json,
-  ]);
+  const p = getPool();
+  const [result] = await p.execute(
+    "UPDATE site_config SET json_data = ?, updated_at = CURRENT_TIMESTAMP(3) WHERE id = 1",
+    [json]
+  );
+  const affected = result && typeof result.affectedRows === "number" ? result.affectedRows : 0;
+  if (affected === 0) {
+    await p.execute("INSERT INTO site_config (id, json_data) VALUES (1, ?)", [json]);
+  }
 }
 
 async function appendAnalytics(row) {

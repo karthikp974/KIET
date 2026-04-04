@@ -494,7 +494,15 @@
       return;
     }
     if (!r.ok) {
-      alert("Save failed");
+      var errMsg = "Save failed (" + r.status + ")";
+      try {
+        var ej = await r.json();
+        if (ej && ej.error) errMsg += ": " + ej.error;
+      } catch (e) {
+        /* ignore */
+      }
+      if (r.status === 413) errMsg += " — site JSON too large; remove huge images or contact host.";
+      alert(errMsg);
       return;
     }
     $("save-status").textContent = "Saved.";
