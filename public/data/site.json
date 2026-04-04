@@ -10,7 +10,7 @@
   "chatWidgetUrl": "",
   "whatsappNumber": "917981893706",
   "hero": {
-    "image": "/uploads/f-1775330684986-jxw20g.jpg",
+    "image": "/images/hero.png",
     "headline": "Empowering future",
     "line1": "Future Ready.",
     "tagline": "Andhra Pradesh's Premier Innovation Hub. Integrating AI, Robotics, and Entrepreneurship into every degree.",
@@ -22,7 +22,7 @@
   },
   "campusSpotlight": [
     {
-      "id": "c-q571w26xykh",
+      "id": "c-ibqxnqa3qha",
       "title": "Annual Tech Fest",
       "summary": "Hackathons, expos, and cultural night — a week the whole campus looks forward to.",
       "image": "/uploads/f-1775330698604-i151sh.jpg",
@@ -33,7 +33,7 @@
       ]
     },
     {
-      "id": "c-1b8vb0yhma3",
+      "id": "c-qc8eznbryfk",
       "title": "Industry on campus",
       "summary": "Leaders from partner companies visit for talks and live problem-solving sessions.",
       "image": "https://images.unsplash.com/photo-1475721027785-f74eccf877e2?w=600&h=600&fit=crop",
@@ -43,7 +43,7 @@
   ],
   "placements": [
     {
-      "id": "p-3yi0wnb5gle",
+      "id": "p-nzmpojjv98",
       "studentName": "Sample graduate",
       "branch": "",
       "company": "Leading IT firm",
@@ -241,25 +241,25 @@
   ],
   "visionaries": [
     {
-      "id": "v-91j0nca8vzr",
+      "id": "v-zn2manm2tsd",
       "name": "Dr. Revathi Duba",
       "role": "Director",
       "image": "/uploads/f-1775330724665-bmcwsu.jpg"
     },
     {
-      "id": "v-gnvzt5lvaqj",
+      "id": "v-9lxuvum5tz",
       "name": "Smt. Surekha Rao",
       "role": "Director, Director Out-Reach",
       "image": ""
     },
     {
-      "id": "v-twemhnsdj4d",
+      "id": "v-z3lnl0ho64b",
       "name": "Prof. Y Rama Krishna",
       "role": "Director, Student Affairs",
       "image": ""
     },
     {
-      "id": "v-7smjo3egvqk",
+      "id": "v-rjy8jr01e8n",
       "name": "Prof. Aishwarya",
       "role": "Director",
       "image": ""
@@ -267,7 +267,7 @@
   ],
   "clubs": [
     {
-      "id": "cl-pvqr9xbawzg",
+      "id": "cl-thtkocg29uf",
       "title": "Tech Club",
       "subtitle": "KIET Robotics Lab",
       "blurb": "Build bots, compete, and learn by making.",
@@ -275,7 +275,7 @@
       "image": "https://images.unsplash.com/photo-1581092160562-40aa08e78837?w=600&fit=crop"
     },
     {
-      "id": "cl-ygj7tilynw",
+      "id": "cl-a26x2x4tmwh",
       "title": "Google Developer Club",
       "subtitle": "GDSC",
       "blurb": "Student dev community for Google technologies.",
@@ -283,7 +283,7 @@
       "image": "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=600&fit=crop"
     },
     {
-      "id": "cl-x1a92pmq71m",
+      "id": "cl-sasenoxi0vq",
       "title": "Security Club",
       "subtitle": "KIET Cyber Crew",
       "blurb": "Ethical hacking drills and safe digital habits.",
@@ -291,7 +291,7 @@
       "image": "https://images.unsplash.com/photo-1563986768609-322da13575f3?w=600&fit=crop"
     },
     {
-      "id": "cl-s8hcvvxyeaq",
+      "id": "cl-pbfcn6hoz1k",
       "title": "Coding Club",
       "subtitle": "KIET GCC",
       "blurb": "Contests, peer learning, and late-night debug sessions.",
@@ -299,7 +299,7 @@
       "image": "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=600&fit=crop"
     },
     {
-      "id": "cl-fykfc2eivch",
+      "id": "cl-fq7r61h6ylv",
       "title": "Leadership",
       "subtitle": "Student leadership cell",
       "blurb": "Plan events, represent peers, grow confidence.",
@@ -307,7 +307,7 @@
       "image": "https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=600&fit=crop"
     },
     {
-      "id": "cl-jd1l9jhonj",
+      "id": "cl-jkah1mxpo7",
       "title": "Sports",
       "subtitle": "Play, Compete & Win",
       "blurb": "Grounds, teams, and house spirit all year.",
@@ -315,7 +315,7 @@
       "image": "https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=600&fit=crop"
     },
     {
-      "id": "cl-bmsrd261rm7",
+      "id": "cl-6h54edp6mdo",
       "title": "Public Speaking",
       "subtitle": "Toastmasters — Speak, Lead, Communicate",
       "blurb": "Weekly meetings to speak with clarity and calm.",
@@ -325,28 +325,28 @@
   ],
   "difference": [
     {
-      "id": "d-50iqaqwduok",
+      "id": "d-42gszn1z6bg",
       "title": "KIOT",
       "teaser": "Industrial tours that make theory real.",
       "body": "Regular visits to technology parks and production floors so you see how engineers actually work.",
       "gallery": []
     },
     {
-      "id": "d-0wk8bad4h9c",
+      "id": "d-29lvihvo873",
       "title": "Teach to Learn",
       "teaser": "Students explain concepts to classmates.",
       "body": "Short teaching slots build confidence and deep understanding — when you can teach it, you truly know it.",
       "gallery": []
     },
     {
-      "id": "d-giwyw7e61z4",
+      "id": "d-5q6y13fwois",
       "title": "Micro-Leadership",
       "teaser": "Small teams, student leads, real ownership.",
       "body": "Classes split into agile groups with rotating managers so leadership becomes a habit, not a final-year crash course.",
       "gallery": []
     },
     {
-      "id": "d-chiogk1gopr",
+      "id": "d-iy8or3dpuf",
       "title": "Skill Workshops",
       "teaser": "Weekly hands-on labs led by peers and mentors.",
       "body": "Workshops on modern stacks and tools — from web and mobile to cloud — so your portfolio grows every semester.",

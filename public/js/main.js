@@ -904,11 +904,18 @@
       fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "same-origin",
         body: JSON.stringify({ sessionId: sessionId, message: t }),
       })
         .then(function (r) {
-          return r.json().then(function (j) {
-            if (!r.ok) throw new Error(j.error || String(r.status));
+          return r.text().then(function (text) {
+            var j = {};
+            try {
+              j = text ? JSON.parse(text) : {};
+            } catch (e) {
+              throw new Error("Server error (" + r.status + ")");
+            }
+            if (!r.ok) throw new Error(j.error || "HTTP " + r.status);
             return j;
           });
         })
@@ -921,8 +928,13 @@
             box.scrollTop = box.scrollHeight;
           }
         })
-        .catch(function () {
-          alert("Could not send. Open the site at http://localhost:3750/ (run npm start), not as a saved file.");
+        .catch(function (err) {
+          var detail = err && err.message ? err.message : "Network or server issue";
+          alert(
+            "Could not send your message: " +
+              detail +
+              ". If you’re testing on your PC, run the site with npm start. On the live Railway URL, wait a moment and try again."
+          );
         });
     });
   }
