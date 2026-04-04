@@ -113,9 +113,16 @@ async function listChatAll() {
 
 async function appendChat(row) {
   let list = await listChatAll();
-  list.push(row);
+  list.push({
+    ...row,
+    pageUrl: String(row.pageUrl || "").slice(0, 512),
+  });
   if (list.length > MAX_CHAT) list = list.slice(-MAX_CHAT);
   writeJson(CHAT_FILE, list);
+}
+
+async function ensureMysqlSchemaPatches() {
+  /* no-op for file backend */
 }
 
 async function replaceChatAll(list) {
@@ -153,6 +160,7 @@ module.exports = {
   replaceChatAll,
   markChatVisitorRead,
   clearChat,
+  ensureMysqlSchemaPatches,
   async maybeWipeChatOnStart() {
     if (process.env.WIPE_CHAT_ON_RESTART === "1") {
       writeJson(CHAT_FILE, []);

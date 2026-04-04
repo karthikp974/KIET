@@ -5,6 +5,7 @@
   var selectedChatSession = null;
   var chatPollTimer = null;
   var pendingExportKind = null;
+  var prevChatUnread = null;
 
   function $(id) {
     return document.getElementById(id);
@@ -56,6 +57,7 @@
   function showLogin() {
     adminRole = null;
     selectedChatSession = null;
+    prevChatUnread = null;
     if (chatPollTimer) clearInterval(chatPollTimer);
     chatPollTimer = null;
     $("login-panel").classList.remove("hidden");
@@ -534,6 +536,59 @@
     }
   }
 
+  function maybeNotifyNewChat(current) {
+    if (typeof current !== "number") return;
+    if (
+      prevChatUnread !== null &&
+      current > prevChatUnread &&
+      typeof Notification !== "undefined" &&
+      Notification.permission === "granted"
+    ) {
+      var delta = current - prevChatUnread;
+      var body = delta === 1 ? "1 new unread message" : delta + " new unread messages";
+      try {
+        new Notification("Live chat — visitor", {
+          body: body,
+          tag: "prok-chat-unread",
+        });
+      } catch (e) {
+        /* ignore */
+      }
+    }
+    prevChatUnread = current;
+  }
+
+  function wireChatNotifyButton() {
+    var btn = $("btn-chat-notify");
+    var st = $("chat-notify-status");
+    if (!btn) return;
+    function sync() {
+      if (typeof Notification === "undefined") {
+        if (st) st.textContent = "Not supported in this browser.";
+        btn.disabled = true;
+        return;
+      }
+      if (Notification.permission === "granted") {
+        if (st) st.textContent = "On: you will get alerts when unread count goes up.";
+        btn.textContent = "Notifications enabled";
+        btn.disabled = true;
+      } else if (Notification.permission === "denied") {
+        if (st) st.textContent = "Blocked — allow notifications in your browser settings for this site.";
+        btn.disabled = true;
+      } else {
+        btn.textContent = "Enable desktop notifications";
+        btn.disabled = false;
+        if (st) st.textContent = "";
+      }
+    }
+    sync();
+    btn.addEventListener("click", function () {
+      Notification.requestPermission().then(function () {
+        sync();
+      });
+    });
+  }
+
   function closeExportModal() {
     var m = $("export-fmt-modal");
     if (m) {
@@ -599,7 +654,10 @@
       return;
     }
     var u = await r.json();
-    if (typeof u.chatUnread === "number") updateChatBadge(u.chatUnread);
+    if (typeof u.chatUnread === "number") {
+      maybeNotifyNewChat(u.chatUnread);
+      updateChatBadge(u.chatUnread);
+    }
 
     var g = groupVisitors(u.analytics);
     var rows = Object.keys(g)
@@ -720,11 +778,21 @@
       return;
     }
     var j = await r.json();
-    updateChatBadge(j.totalUnread || 0);
+    var tu = j.totalUnread || 0;
+    updateChatBadge(tu);
+    maybeNotifyNewChat(tu);
     var sessions = j.sessions || [];
     var html = sessions
       .map(function (s) {
         var un = s.unread ? '<span class="chat-unread">' + escText(String(s.unread)) + "</span> " : "";
+        var url = (s.lastPageUrl || "").trim();
+        var urlHtml = url
+          ? '<br /><small class="chat-session-url" title="' +
+            escAttr(url) +
+            '">Page: ' +
+            escText(url.length > 96 ? url.slice(0, 96) + "…" : url) +
+            "</small>"
+          : "";
         return (
           '<button type="button" class="chat-session-row" data-sid="' +
           escAttr(s.sessionId) +
@@ -733,7 +801,9 @@
           escText(s.sessionId.slice(0, 24)) +
           "…<br /><small>" +
           escText(s.preview.slice(0, 80)) +
-          "</small></button>"
+          "</small>" +
+          urlHtml +
+          "</button>"
         );
       })
       .join("");
@@ -745,7 +815,26 @@
     box.innerHTML = (msgs || [])
       .map(function (m) {
         var cl = m.role === "admin" ? "admin" : "visitor";
-        return '<div class="chat-line ' + cl + '"><div class="chat-bubble">' + escText(m.body) + "</div><small>" + escText(m.at) + "</small></div>";
+        var pu = (m.pageUrl || "").trim();
+        var urlLine =
+          cl === "visitor" && pu
+            ? '<div class="chat-msg-url"><a href="' +
+              escAttr(pu) +
+              '" target="_blank" rel="noopener">' +
+              escText(pu.length > 120 ? pu.slice(0, 120) + "…" : pu) +
+              "</a></div>"
+            : "";
+        return (
+          '<div class="chat-line ' +
+          cl +
+          '"><div class="chat-bubble">' +
+          escText(m.body) +
+          "</div>" +
+          urlLine +
+          "<small>" +
+          escText(m.at) +
+          "</small></div>"
+        );
       })
       .join("");
     box.scrollTop = box.scrollHeight;
@@ -955,6 +1044,8 @@
   $("admin-to-top").addEventListener("click", function () {
     window.scrollTo({ top: 0, behavior: "smooth" });
   });
+
+  wireChatNotifyButton();
 
   fetch("/api/me", cred)
     .then(function (r) {

@@ -55,6 +55,7 @@ CREATE TABLE IF NOT EXISTS chat_messages (
   session_id VARCHAR(120) NOT NULL,
   role ENUM('visitor', 'admin') NOT NULL,
   body TEXT NOT NULL,
+  page_url VARCHAR(512) NOT NULL DEFAULT '',
   read_by_admin TINYINT(1) NOT NULL DEFAULT 0,
   INDEX idx_chat_session (session_id),
   INDEX idx_chat_at (at)

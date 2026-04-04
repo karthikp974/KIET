@@ -905,7 +905,11 @@
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "same-origin",
-        body: JSON.stringify({ sessionId: sessionId, message: t }),
+        body: JSON.stringify({
+          sessionId: sessionId,
+          message: t,
+          pageUrl: String(window.location.href || "").slice(0, 512),
+        }),
       })
         .then(function (r) {
           return r.text().then(function (text) {

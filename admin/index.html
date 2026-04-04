@@ -208,6 +208,15 @@
         <section class="tab-panel" id="t-chat">
           <h2>Live chat</h2>
           <p class="hint">Visitors who message from the site chat drawer appear here. Select a session to reply.</p>
+          <p class="hint">
+            Each message includes the full page URL the visitor was on (including hash routes like <code>/#admissions</code>). Main site paths map to sections:
+            <code>/</code>, <code>/#spotlight</code>, <code>/#programs</code>, <code>/#placements</code>, <code>/#mou</code>, <code>/#vision</code>,
+            <code>/#difference</code>, <code>/#about</code>, <code>/#admissions</code>, <code>/#contact</code>.
+          </p>
+          <p class="chat-notify-row">
+            <button type="button" class="btn ghost" id="btn-chat-notify">Enable desktop notifications</button>
+            <span class="hint" id="chat-notify-status"></span>
+          </p>
           <div class="chat-admin-layout">
             <div class="chat-session-list scroll-table" id="chat-sessions"></div>
             <div class="chat-thread-panel">

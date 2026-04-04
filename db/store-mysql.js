@@ -117,8 +117,22 @@ function rowChat(r) {
     sessionId: r.session_id,
     role: r.role,
     body: r.body,
+    pageUrl: r.page_url || "",
     readByAdmin: Boolean(r.read_by_admin),
   };
+}
+
+/** Add page_url column for existing databases (safe to run every startup). */
+async function ensureMysqlSchemaPatches() {
+  const p = getPool();
+  const [rows] = await p.query(
+    "SELECT COUNT(*) AS c FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'chat_messages' AND COLUMN_NAME = 'page_url'"
+  );
+  if (Number(rows[0].c) > 0) return;
+  await p.query(
+    "ALTER TABLE chat_messages ADD COLUMN page_url VARCHAR(512) NOT NULL DEFAULT '' AFTER body"
+  );
+  console.log("MySQL: added chat_messages.page_url (visitor page URL).");
 }
 
 const TRIM_TABLES = new Set(["analytics_events", "admissions", "admissions_partial", "chat_messages"]);
@@ -307,17 +321,26 @@ async function countChatUnread() {
 
 async function listChatAll() {
   const [rows] = await getPool().execute(
-    "SELECT id, at, session_id, role, body, read_by_admin FROM chat_messages ORDER BY at ASC, id ASC"
+    "SELECT id, at, session_id, role, body, page_url, read_by_admin FROM chat_messages ORDER BY at ASC, id ASC"
   );
   return rows.map(rowChat);
 }
 
 async function appendChat(row) {
   const p = getPool();
+  const pageUrl = String(row.pageUrl || "").slice(0, 512);
   await p.execute(
-    `INSERT INTO chat_messages (id, at, session_id, role, body, read_by_admin)
-     VALUES (?, ?, ?, ?, ?, ?)`,
-    [row.id, toMysqlAt(row.at), row.sessionId, row.role, row.body, row.readByAdmin ? 1 : 0]
+    `INSERT INTO chat_messages (id, at, session_id, role, body, page_url, read_by_admin)
+     VALUES (?, ?, ?, ?, ?, ?, ?)`,
+    [
+      row.id,
+      toMysqlAt(row.at),
+      row.sessionId,
+      row.role,
+      row.body,
+      pageUrl,
+      row.readByAdmin ? 1 : 0,
+    ]
   );
   await trimOldest("chat_messages", MAX_CHAT);
 }
@@ -327,8 +350,16 @@ async function replaceChatAll(list) {
   await p.execute("DELETE FROM chat_messages");
   for (const m of list) {
     await p.execute(
-      `INSERT INTO chat_messages (id, at, session_id, role, body, read_by_admin) VALUES (?, ?, ?, ?, ?, ?)`,
-      [m.id, toMysqlAt(m.at), m.sessionId, m.role, m.body, m.readByAdmin ? 1 : 0]
+      `INSERT INTO chat_messages (id, at, session_id, role, body, page_url, read_by_admin) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      [
+        m.id,
+        toMysqlAt(m.at),
+        m.sessionId,
+        m.role,
+        m.body,
+        String(m.pageUrl || "").slice(0, 512),
+        m.readByAdmin ? 1 : 0,
+      ]
     );
   }
 }
@@ -371,4 +402,5 @@ module.exports = {
   clearChat,
   maybeWipeChatOnStart,
   getPool,
+  ensureMysqlSchemaPatches,
 };

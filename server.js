@@ -374,12 +374,14 @@ app.post("/api/chat", async (req, res) => {
     if (!sessionId) return res.status(400).json({ error: "session" });
     const text = String(b.message || "").trim().slice(0, 2000);
     if (!text) return res.status(400).json({ error: "message" });
+    const pageUrl = String(b.pageUrl || "").trim().slice(0, 512);
     const row = {
       id: "ch-" + Date.now() + "-" + Math.random().toString(36).slice(2, 6),
       at: new Date().toISOString(),
       sessionId,
       role: "visitor",
       body: text,
+      pageUrl,
       readByAdmin: false,
     };
     await store.appendChat(row);
@@ -414,10 +416,12 @@ app.get("/api/admin/chat", requireAnyAdmin, async (req, res) => {
     const bySession = {};
     list.forEach((m) => {
       const sid = m.sessionId || "x";
-      if (!bySession[sid]) bySession[sid] = { sessionId: sid, messages: [], unread: 0, lastAt: m.at };
+      if (!bySession[sid])
+        bySession[sid] = { sessionId: sid, messages: [], unread: 0, lastAt: m.at, lastPageUrl: "" };
       bySession[sid].messages.push(m);
       if (m.at > bySession[sid].lastAt) bySession[sid].lastAt = m.at;
       if (m.role === "visitor" && !m.readByAdmin) bySession[sid].unread += 1;
+      if (m.role === "visitor" && m.pageUrl) bySession[sid].lastPageUrl = m.pageUrl;
     });
     const sessions = Object.values(bySession)
       .map((s) => ({
@@ -425,6 +429,7 @@ app.get("/api/admin/chat", requireAnyAdmin, async (req, res) => {
         lastAt: s.lastAt,
         unread: s.unread,
         preview: (s.messages[s.messages.length - 1] || {}).body || "",
+        lastPageUrl: s.lastPageUrl || "",
       }))
       .sort((a, b) => String(b.lastAt).localeCompare(String(a.lastAt)));
     res.json({ sessions, totalUnread: sessions.reduce((n, s) => n + s.unread, 0) });
@@ -460,6 +465,7 @@ app.post("/api/admin/chat/reply", requireAnyAdmin, async (req, res) => {
       sessionId,
       role: "admin",
       body: text,
+      pageUrl: "",
       readByAdmin: true,
     };
     await store.appendChat(row);
@@ -561,13 +567,17 @@ app.post("/api/admin/chat/clear", requireFullAdmin, async (req, res) => {
 app.use(express.static(PUBLIC));
 app.use("/admin", express.static(path.join(ROOT, "admin")));
 
-store.maybeWipeChatOnStart().catch((e) => console.error(e));
-
-app.listen(PORT, () => {
-  console.log("College site:  http://localhost:" + PORT + "/");
-  console.log("Admin:         http://localhost:" + PORT + "/admin/");
-  console.log("Data backend:  " + store.backend + (store.backend === "mysql" ? " (DATABASE_URL / MYSQL*)" : " (JSON files under data/)"));
-  if (process.env.WIPE_CHAT_ON_RESTART !== "1") {
-    console.log("Tip: Set WIPE_CHAT_ON_RESTART=1 to clear chat on each deploy, or use Admin → Clear all chat history.");
+(async function startServer() {
+  await store.maybeWipeChatOnStart().catch((e) => console.error(e));
+  if (typeof store.ensureMysqlSchemaPatches === "function") {
+    await store.ensureMysqlSchemaPatches().catch((e) => console.error("MySQL schema patch:", e));
   }
-});
+  app.listen(PORT, () => {
+    console.log("College site:  http://localhost:" + PORT + "/");
+    console.log("Admin:         http://localhost:" + PORT + "/admin/");
+    console.log("Data backend:  " + store.backend + (store.backend === "mysql" ? " (DATABASE_URL / MYSQL*)" : " (JSON files under data/)"));
+    if (process.env.WIPE_CHAT_ON_RESTART !== "1") {
+      console.log("Tip: Set WIPE_CHAT_ON_RESTART=1 to clear chat on each deploy, or use Admin → Clear all chat history.");
+    }
+  });
+})();
