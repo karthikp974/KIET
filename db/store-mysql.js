@@ -43,6 +43,15 @@ function iso(d) {
   return String(d);
 }
 
+/** MySQL DATETIME(3) rejects ISO `2026-04-04T23:05:23.981Z`; use space and no Z. */
+function toMysqlAt(v) {
+  const d = v instanceof Date ? v : new Date(v);
+  if (isNaN(d.getTime())) {
+    return new Date().toISOString().slice(0, 23).replace("T", " ");
+  }
+  return d.toISOString().slice(0, 23).replace("T", " ");
+}
+
 function rowAnalytics(r) {
   let payload = r.payload;
   if (typeof payload === "string") {
@@ -163,7 +172,7 @@ async function appendAnalytics(row) {
      VALUES (?, ?, ?, ?, ?, CAST(? AS JSON), ?, ?)`,
     [
       row.id,
-      row.at,
+      toMysqlAt(row.at),
       row.type,
       row.sessionId,
       row.section,
@@ -207,7 +216,7 @@ async function appendAdmission(row) {
      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       row.id,
-      row.at,
+      toMysqlAt(row.at),
       row.source,
       row.sessionId || "",
       row.fullName || "",
@@ -253,7 +262,14 @@ async function appendPartial(row) {
   await p.execute(
     `INSERT INTO admissions_partial (id, at, session_id, completion_percent, page, fields)
      VALUES (?, ?, ?, ?, ?, CAST(? AS JSON))`,
-    [row.id, row.at, row.sessionId, row.completionPercent, row.page || "admissions", JSON.stringify(row.fields || {})]
+    [
+      row.id,
+      toMysqlAt(row.at),
+      row.sessionId,
+      row.completionPercent,
+      row.page || "admissions",
+      JSON.stringify(row.fields || {}),
+    ]
   );
   await trimOldest("admissions_partial", MAX_ADMISSIONS * 3);
 }
@@ -301,7 +317,7 @@ async function appendChat(row) {
   await p.execute(
     `INSERT INTO chat_messages (id, at, session_id, role, body, read_by_admin)
      VALUES (?, ?, ?, ?, ?, ?)`,
-    [row.id, row.at, row.sessionId, row.role, row.body, row.readByAdmin ? 1 : 0]
+    [row.id, toMysqlAt(row.at), row.sessionId, row.role, row.body, row.readByAdmin ? 1 : 0]
   );
   await trimOldest("chat_messages", MAX_CHAT);
 }
@@ -312,7 +328,7 @@ async function replaceChatAll(list) {
   for (const m of list) {
     await p.execute(
       `INSERT INTO chat_messages (id, at, session_id, role, body, read_by_admin) VALUES (?, ?, ?, ?, ?, ?)`,
-      [m.id, m.at, m.sessionId, m.role, m.body, m.readByAdmin ? 1 : 0]
+      [m.id, toMysqlAt(m.at), m.sessionId, m.role, m.body, m.readByAdmin ? 1 : 0]
     );
   }
 }
