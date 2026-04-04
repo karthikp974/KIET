@@ -22,7 +22,17 @@ let pool;
 
 function getPool() {
   if (!pool) {
-    pool = mysql.createPool({ ...poolConfig(), waitForConnections: true, connectionLimit: 10 });
+    const cfg = poolConfig();
+    // Never spread a string: { ..."mysql://..." } becomes {0:"m",1:"y",...} and breaks mysql2 (ECONNREFUSED).
+    if (typeof cfg === "string") {
+      pool = mysql.createPool(cfg);
+    } else {
+      pool = mysql.createPool({
+        ...cfg,
+        waitForConnections: true,
+        connectionLimit: 10,
+      });
+    }
   }
   return pool;
 }
