@@ -122,6 +122,14 @@ function rowChat(r) {
   };
 }
 
+function isMissingPageUrlColumnError(e) {
+  const msg = e && e.message ? String(e.message) : "";
+  return (
+    (e && (e.code === "ER_BAD_FIELD_ERROR" || Number(e.errno) === 1054) && /page_url/i.test(msg)) ||
+    false
+  );
+}
+
 /** Add page_url column for existing databases (safe to run every startup). */
 async function ensureMysqlSchemaPatches() {
   const p = getPool();
@@ -129,9 +137,18 @@ async function ensureMysqlSchemaPatches() {
     "SELECT COUNT(*) AS c FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'chat_messages' AND COLUMN_NAME = 'page_url'"
   );
   if (Number(rows[0].c) > 0) return;
-  await p.query(
-    "ALTER TABLE chat_messages ADD COLUMN page_url VARCHAR(512) NOT NULL DEFAULT '' AFTER body"
-  );
+  try {
+    await p.query(
+      "ALTER TABLE chat_messages ADD COLUMN page_url VARCHAR(512) NOT NULL DEFAULT '' AFTER body"
+    );
+  } catch (e1) {
+    try {
+      await p.query("ALTER TABLE chat_messages ADD COLUMN page_url VARCHAR(512) NOT NULL DEFAULT ''");
+    } catch (e2) {
+      console.error("MySQL: could not add chat_messages.page_url:", e2 && e2.message ? e2.message : e2);
+      throw e1;
+    }
+  }
   console.log("MySQL: added chat_messages.page_url (visitor page URL).");
 }
 
@@ -208,9 +225,9 @@ async function listAnalyticsAll() {
 /** Last N events (newest first in SQL, returned chronological) — avoids loading huge tables for admin dashboard. */
 async function listAnalyticsTail(n) {
   const lim = Math.min(10000, Math.max(1, parseInt(String(n), 10) || 2500));
-  const [rows] = await getPool().execute(
-    "SELECT id, at, type, session_id, section, payload, ip, ua FROM analytics_events ORDER BY at DESC, id DESC LIMIT ?",
-    [lim]
+  // Use numeric LIMIT (not prepared ?) — some hosted MySQL / proxies reject LIMIT placeholders.
+  const [rows] = await getPool().query(
+    `SELECT id, at, type, session_id, section, payload, ip, ua FROM analytics_events ORDER BY at DESC, id DESC LIMIT ${lim}`
   );
   const mapped = [];
   for (let i = rows.length - 1; i >= 0; i--) {
@@ -256,9 +273,8 @@ async function listAdmissionsAll() {
 
 async function listAdmissionsTail(n) {
   const lim = Math.min(10000, Math.max(1, parseInt(String(n), 10) || 500));
-  const [rows] = await getPool().execute(
-    "SELECT id, at, source, session_id, full_name, email, dob, stream, branch, phone, city, district, name FROM admissions ORDER BY at DESC, id DESC LIMIT ?",
-    [lim]
+  const [rows] = await getPool().query(
+    `SELECT id, at, source, session_id, full_name, email, dob, stream, branch, phone, city, district, name FROM admissions ORDER BY at DESC, id DESC LIMIT ${lim}`
   );
   const mapped = [];
   for (let i = rows.length - 1; i >= 0; i--) {
@@ -297,9 +313,8 @@ async function listPartialsAll() {
 
 async function listPartialsTail(n) {
   const lim = Math.min(15000, Math.max(1, parseInt(String(n), 10) || 1500));
-  const [rows] = await getPool().execute(
-    "SELECT id, at, session_id, completion_percent, page, fields FROM admissions_partial ORDER BY at DESC, id DESC LIMIT ?",
-    [lim]
+  const [rows] = await getPool().query(
+    `SELECT id, at, session_id, completion_percent, page, fields FROM admissions_partial ORDER BY at DESC, id DESC LIMIT ${lim}`
   );
   const mapped = [];
   for (let i = rows.length - 1; i >= 0; i--) {
@@ -320,28 +335,58 @@ async function countChatUnread() {
 }
 
 async function listChatAll() {
-  const [rows] = await getPool().execute(
-    "SELECT id, at, session_id, role, body, page_url, read_by_admin FROM chat_messages ORDER BY at ASC, id ASC"
-  );
-  return rows.map(rowChat);
+  const p = getPool();
+  try {
+    const [rows] = await p.execute(
+      "SELECT id, at, session_id, role, body, page_url, read_by_admin FROM chat_messages ORDER BY at ASC, id ASC"
+    );
+    return rows.map(rowChat);
+  } catch (e) {
+    if (isMissingPageUrlColumnError(e)) {
+      const [rows] = await p.execute(
+        "SELECT id, at, session_id, role, body, read_by_admin FROM chat_messages ORDER BY at ASC, id ASC"
+      );
+      return rows.map((r) => rowChat({ ...r, page_url: "" }));
+    }
+    throw e;
+  }
 }
 
 async function appendChat(row) {
   const p = getPool();
   const pageUrl = String(row.pageUrl || "").slice(0, 512);
-  await p.execute(
-    `INSERT INTO chat_messages (id, at, session_id, role, body, page_url, read_by_admin)
-     VALUES (?, ?, ?, ?, ?, ?, ?)`,
-    [
-      row.id,
-      toMysqlAt(row.at),
-      row.sessionId,
-      row.role,
-      row.body,
-      pageUrl,
-      row.readByAdmin ? 1 : 0,
-    ]
-  );
+  try {
+    await p.execute(
+      `INSERT INTO chat_messages (id, at, session_id, role, body, page_url, read_by_admin)
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      [
+        row.id,
+        toMysqlAt(row.at),
+        row.sessionId,
+        row.role,
+        row.body,
+        pageUrl,
+        row.readByAdmin ? 1 : 0,
+      ]
+    );
+  } catch (e) {
+    if (isMissingPageUrlColumnError(e)) {
+      await p.execute(
+        `INSERT INTO chat_messages (id, at, session_id, role, body, read_by_admin)
+         VALUES (?, ?, ?, ?, ?, ?)`,
+        [
+          row.id,
+          toMysqlAt(row.at),
+          row.sessionId,
+          row.role,
+          row.body,
+          row.readByAdmin ? 1 : 0,
+        ]
+      );
+    } else {
+      throw e;
+    }
+  }
   await trimOldest("chat_messages", MAX_CHAT);
 }
 

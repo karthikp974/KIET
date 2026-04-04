@@ -477,21 +477,38 @@ app.post("/api/admin/chat/reply", requireAnyAdmin, async (req, res) => {
 });
 
 app.get("/api/admin/updates", requireAnyAdmin, async (req, res) => {
+  const payload = {
+    analytics: [],
+    admissionsFull: [],
+    admissionsPartial: [],
+    chatUnread: 0,
+  };
+  const tasks = [
+    ["countChatUnread", () => store.countChatUnread().then((n) => (payload.chatUnread = n))],
+    ["listAnalyticsTail", () => store.listAnalyticsTail(2500).then((rows) => (payload.analytics = rows))],
+    [
+      "listAdmissionsTail",
+      () => store.listAdmissionsTail(500).then((rows) => (payload.admissionsFull = rows)),
+    ],
+    [
+      "listPartialsTail",
+      () => store.listPartialsTail(1500).then((rows) => (payload.admissionsPartial = rows)),
+    ],
+  ];
+  for (const [name, fn] of tasks) {
+    try {
+      await fn();
+    } catch (e) {
+      console.error("GET /api/admin/updates " + name, e);
+    }
+  }
   try {
-    const chatUnread = await store.countChatUnread();
-    const analytics = await store.listAnalyticsTail(2500);
-    const admissionsFull = await store.listAdmissionsTail(500);
-    const admissionsPartial = await store.listPartialsTail(1500);
-    res.json({
-      analytics,
-      admissionsFull,
-      admissionsPartial,
-      chatUnread,
-    });
+    res.type("json").send(
+      JSON.stringify(payload, (_k, v) => (typeof v === "bigint" ? Number(v) : v))
+    );
   } catch (e) {
-    console.error("GET /api/admin/updates", e);
-    const msg = e && e.message ? String(e.message).slice(0, 250) : "server";
-    res.status(500).json({ error: msg });
+    console.error("GET /api/admin/updates serialize", e);
+    res.status(500).json({ error: "serialize failed" });
   }
 });
 
