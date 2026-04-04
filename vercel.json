@@ -4,11 +4,11 @@
   "rewrites": [
     {
       "source": "/api/:path*",
-      "destination": "https://REPLACE_WITH_YOUR_RAILWAY_APP_URL.up.railway.app/api/:path*"
+      "destination": "https://kiet-production.up.railway.app/api/:path*"
     },
     {
       "source": "/uploads/:path*",
-      "destination": "https://REPLACE_WITH_YOUR_RAILWAY_APP_URL.up.railway.app/uploads/:path*"
+      "destination": "https://kiet-production.up.railway.app/uploads/:path*"
     }
   ]
 }
