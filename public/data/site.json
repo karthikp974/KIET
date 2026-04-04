@@ -1,0 +1,374 @@
+{
+  "collegeName": "KAKINADA INSTITUTE OF ENGINEERING AND TECHNOLOGY",
+  "shortName": "KIET",
+  "menuLogo": "/uploads/f-1775330692200-kop2v6.jpg",
+  "pixels": {
+    "metaPixelId": "",
+    "googleTagId": "",
+    "snapPixelId": ""
+  },
+  "chatWidgetUrl": "",
+  "whatsappNumber": "917981893706",
+  "hero": {
+    "image": "/uploads/f-1775330684986-jxw20g.jpg",
+    "headline": "Empowering future",
+    "line1": "Future Ready.",
+    "tagline": "Andhra Pradesh's Premier Innovation Hub. Integrating AI, Robotics, and Entrepreneurship into every degree.",
+    "statLeftValue": "4000",
+    "statLeftLabel": "Students",
+    "statRightValue": "4000",
+    "statRightLabel": "Placements",
+    "packageLine": "₹ 34 Lakhs highest package"
+  },
+  "campusSpotlight": [
+    {
+      "id": "c-q571w26xykh",
+      "title": "Annual Tech Fest",
+      "summary": "Hackathons, expos, and cultural night — a week the whole campus looks forward to.",
+      "image": "/uploads/f-1775330698604-i151sh.jpg",
+      "body": "Add a longer story here in admin: judges, prizes, student teams, and photos from the event.",
+      "gallery": [
+        "https://images.unsplash.com/photo-1540575467063-027aef893e4e?w=900",
+        "https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=900"
+      ]
+    },
+    {
+      "id": "c-1b8vb0yhma3",
+      "title": "Industry on campus",
+      "summary": "Leaders from partner companies visit for talks and live problem-solving sessions.",
+      "image": "https://images.unsplash.com/photo-1475721027785-f74eccf877e2?w=600&h=600&fit=crop",
+      "body": "Describe sessions, student takeaways, and follow-up internships or projects.",
+      "gallery": []
+    }
+  ],
+  "placements": [
+    {
+      "id": "p-3yi0wnb5gle",
+      "studentName": "Sample graduate",
+      "branch": "",
+      "company": "Leading IT firm",
+      "package": "",
+      "year": "",
+      "image": "/uploads/f-1775330628645-216ygo.jpg"
+    }
+  ],
+  "programStreams": [
+    {
+      "id": "btech",
+      "name": "B.Tech",
+      "branches": [
+        {
+          "id": "b-ai",
+          "name": "Artificial Intelligence",
+          "blurb": "Learn how machines sense patterns, make decisions, and assist people in healthcare, farming, and industry — in simple, practical projects from year one.",
+          "duration": "4 Years",
+          "image": "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=800&fit=crop"
+        },
+        {
+          "id": "b-aiml",
+          "name": "AI & Machine Learning",
+          "blurb": "Build models that learn from data: recommendations, vision, and language — with labs that feel like real product teams.",
+          "duration": "4 Years",
+          "image": "https://images.unsplash.com/photo-1620712943543-bcc4688e7485?w=800&fit=crop"
+        },
+        {
+          "id": "b-ds",
+          "name": "Data Science",
+          "blurb": "Turn raw numbers into decisions: visual stories, forecasting, and responsible use of data for business and society.",
+          "duration": "4 Years",
+          "image": "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&fit=crop"
+        },
+        {
+          "id": "b-aids",
+          "name": "AI & Data Science",
+          "blurb": "A blended path: AI intuition plus data discipline — ideal if you want both coding depth and analytics strength.",
+          "duration": "4 Years",
+          "image": "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=800&fit=crop"
+        },
+        {
+          "id": "b-cyber",
+          "name": "Cyber Security",
+          "blurb": "Protect systems and people: ethical hacking basics, secure design, and the mindset to stay ahead of threats.",
+          "duration": "4 Years",
+          "image": "https://images.unsplash.com/photo-1563986768609-322da13575f3?w=800&fit=crop"
+        }
+      ]
+    },
+    {
+      "id": "mtech",
+      "name": "M.Tech",
+      "branches": [
+        {
+          "id": "m-ai",
+          "name": "Artificial Intelligence",
+          "blurb": "Deeper research orientation with seminars, publications, and industry-aligned thesis work.",
+          "duration": "2 Years",
+          "image": "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=800&fit=crop"
+        },
+        {
+          "id": "m-aiml",
+          "name": "AI & Machine Learning",
+          "blurb": "Advanced ML pipelines, deployment, and evaluation for production-grade systems.",
+          "duration": "2 Years",
+          "image": "https://images.unsplash.com/photo-1620712943543-bcc4688e7485?w=800&fit=crop"
+        },
+        {
+          "id": "m-ds",
+          "name": "Data Science",
+          "blurb": "Statistical rigour, big-data tooling, and storytelling for leadership decisions.",
+          "duration": "2 Years",
+          "image": "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&fit=crop"
+        },
+        {
+          "id": "m-aids",
+          "name": "AI & Data Science",
+          "blurb": "Combine research methods in AI with large-scale data engineering practice.",
+          "duration": "2 Years",
+          "image": "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=800&fit=crop"
+        },
+        {
+          "id": "m-cyber",
+          "name": "Cyber Security",
+          "blurb": "Network defence, incident response, and secure architecture at postgraduate depth.",
+          "duration": "2 Years",
+          "image": "https://images.unsplash.com/photo-1563986768609-322da13575f3?w=800&fit=crop"
+        }
+      ]
+    },
+    {
+      "id": "mbamca",
+      "name": "MBA / MCA",
+      "branches": [
+        {
+          "id": "mca",
+          "name": "MCA",
+          "blurb": "Software engineering, systems design, and IT management for versatile tech careers.",
+          "duration": "2 Years",
+          "image": "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=800&fit=crop"
+        },
+        {
+          "id": "mba",
+          "name": "MBA",
+          "blurb": "Management foundations with analytics and communication — for roles that bridge tech and business.",
+          "duration": "2 Years",
+          "image": "https://images.unsplash.com/photo-1552664730-d307ca884978?w=800&fit=crop"
+        }
+      ]
+    },
+    {
+      "id": "diploma",
+      "name": "Diploma",
+      "branches": [
+        {
+          "id": "cme",
+          "name": "Computer Engineering (CME)",
+          "blurb": "Hands-on programming, hardware basics, and workplace readiness in three focused years.",
+          "duration": "3 Years",
+          "image": "https://images.unsplash.com/photo-1518770660439-4636190af475?w=800&fit=crop"
+        }
+      ]
+    }
+  ],
+  "industryMOU": [
+    {
+      "name": "IITH",
+      "logo": "https://www.google.com/s2/favicons?domain=iith.ac.in&sz=128"
+    },
+    {
+      "name": "Google Cloud",
+      "logo": "https://www.google.com/s2/favicons?domain=cloud.google.com&sz=128"
+    },
+    {
+      "name": "KIET Smart City Lab",
+      "logo": "/uploads/f-1775322498725-evnqjb.jpg"
+    },
+    {
+      "name": "Toastmasters",
+      "logo": "/uploads/f-1775330717896-zfll39.jpg"
+    },
+    {
+      "name": "KIET Robotics Lab",
+      "logo": "/uploads/f-1775322555644-99gp71.jpg"
+    },
+    {
+      "name": "Microsoft AICW",
+      "logo": "https://www.google.com/s2/favicons?domain=microsoft.com&sz=128"
+    },
+    {
+      "name": "Oracle Academy",
+      "logo": "https://www.google.com/s2/favicons?domain=oracle.com&sz=128"
+    },
+    {
+      "name": "OSMSEC",
+      "logo": "https://www.google.com/s2/favicons?domain=osmsec.org&sz=128"
+    },
+    {
+      "name": "Spirelab",
+      "logo": "https://www.google.com/s2/favicons?domain=spire.com&sz=128"
+    },
+    {
+      "name": "Qualcomm",
+      "logo": "https://www.google.com/s2/favicons?domain=qualcomm.com&sz=128"
+    },
+    {
+      "name": "NVIDIA",
+      "logo": "https://www.google.com/s2/favicons?domain=nvidia.com&sz=128"
+    },
+    {
+      "name": "NASSCOM",
+      "logo": "https://www.google.com/s2/favicons?domain=nasscom.in&sz=128"
+    },
+    {
+      "name": "IIT Tirupati",
+      "logo": "https://www.google.com/s2/favicons?domain=iittp.ac.in&sz=128"
+    },
+    {
+      "name": "EduSkills",
+      "logo": "https://www.google.com/s2/favicons?domain=eduskillsfoundation.org&sz=128"
+    },
+    {
+      "name": "Edunet",
+      "logo": "https://www.google.com/s2/favicons?domain=edunetfoundation.org&sz=128"
+    },
+    {
+      "name": "ICT Academy",
+      "logo": "https://www.google.com/s2/favicons?domain=ictacademy.in&sz=128"
+    },
+    {
+      "name": "Infosys Foundation",
+      "logo": "https://www.google.com/s2/favicons?domain=infosys.com&sz=128"
+    }
+  ],
+  "visionaries": [
+    {
+      "id": "v-91j0nca8vzr",
+      "name": "Dr. Revathi Duba",
+      "role": "Director",
+      "image": "/uploads/f-1775330724665-bmcwsu.jpg"
+    },
+    {
+      "id": "v-gnvzt5lvaqj",
+      "name": "Smt. Surekha Rao",
+      "role": "Director, Director Out-Reach",
+      "image": ""
+    },
+    {
+      "id": "v-twemhnsdj4d",
+      "name": "Prof. Y Rama Krishna",
+      "role": "Director, Student Affairs",
+      "image": ""
+    },
+    {
+      "id": "v-7smjo3egvqk",
+      "name": "Prof. Aishwarya",
+      "role": "Director",
+      "image": ""
+    }
+  ],
+  "clubs": [
+    {
+      "id": "cl-pvqr9xbawzg",
+      "title": "Tech Club",
+      "subtitle": "KIET Robotics Lab",
+      "blurb": "Build bots, compete, and learn by making.",
+      "instagram": "https://instagram.com/robotics_kiet",
+      "image": "https://images.unsplash.com/photo-1581092160562-40aa08e78837?w=600&fit=crop"
+    },
+    {
+      "id": "cl-ygj7tilynw",
+      "title": "Google Developer Club",
+      "subtitle": "GDSC",
+      "blurb": "Student dev community for Google technologies.",
+      "instagram": "https://instagram.com/gdsc_kiet",
+      "image": "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=600&fit=crop"
+    },
+    {
+      "id": "cl-x1a92pmq71m",
+      "title": "Security Club",
+      "subtitle": "KIET Cyber Crew",
+      "blurb": "Ethical hacking drills and safe digital habits.",
+      "instagram": "https://instagram.com/cyber_crew_kiet",
+      "image": "https://images.unsplash.com/photo-1563986768609-322da13575f3?w=600&fit=crop"
+    },
+    {
+      "id": "cl-s8hcvvxyeaq",
+      "title": "Coding Club",
+      "subtitle": "KIET GCC",
+      "blurb": "Contests, peer learning, and late-night debug sessions.",
+      "instagram": "https://instagram.com/gcc_kiet",
+      "image": "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=600&fit=crop"
+    },
+    {
+      "id": "cl-fykfc2eivch",
+      "title": "Leadership",
+      "subtitle": "Student leadership cell",
+      "blurb": "Plan events, represent peers, grow confidence.",
+      "instagram": "",
+      "image": "https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=600&fit=crop"
+    },
+    {
+      "id": "cl-jd1l9jhonj",
+      "title": "Sports",
+      "subtitle": "Play, Compete & Win",
+      "blurb": "Grounds, teams, and house spirit all year.",
+      "instagram": "https://instagram.com/kiet_culture",
+      "image": "https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=600&fit=crop"
+    },
+    {
+      "id": "cl-bmsrd261rm7",
+      "title": "Public Speaking",
+      "subtitle": "Toastmasters — Speak, Lead, Communicate",
+      "blurb": "Weekly meetings to speak with clarity and calm.",
+      "instagram": "https://instagram.com/toastmasterskiet",
+      "image": "https://images.unsplash.com/photo-1475721027785-f74eccf877e2?w=600&fit=crop"
+    }
+  ],
+  "difference": [
+    {
+      "id": "d-50iqaqwduok",
+      "title": "KIOT",
+      "teaser": "Industrial tours that make theory real.",
+      "body": "Regular visits to technology parks and production floors so you see how engineers actually work.",
+      "gallery": []
+    },
+    {
+      "id": "d-0wk8bad4h9c",
+      "title": "Teach to Learn",
+      "teaser": "Students explain concepts to classmates.",
+      "body": "Short teaching slots build confidence and deep understanding — when you can teach it, you truly know it.",
+      "gallery": []
+    },
+    {
+      "id": "d-giwyw7e61z4",
+      "title": "Micro-Leadership",
+      "teaser": "Small teams, student leads, real ownership.",
+      "body": "Classes split into agile groups with rotating managers so leadership becomes a habit, not a final-year crash course.",
+      "gallery": []
+    },
+    {
+      "id": "d-chiogk1gopr",
+      "title": "Skill Workshops",
+      "teaser": "Weekly hands-on labs led by peers and mentors.",
+      "body": "Workshops on modern stacks and tools — from web and mobile to cloud — so your portfolio grows every semester.",
+      "gallery": []
+    }
+  ],
+  "differenceTitle": "What makes us different?",
+  "differenceSubtitle": "Why we stand out — tap each milestone to read more.",
+  "aboutPage": {
+    "heroImage": "/uploads/f-1775329684164-ufx9yq.jpg",
+    "body": "Krson matters as much as clearing exams."
+  },
+  "admissionsPage": {
+    "heroImage": "/images/hero.png"
+  },
+  "contactPage": {
+    "address": "KIET Group of Institutions,\nKakinada - Yanam Road, Korangi,\nEast Godavari Dist, A.P - 533461",
+    "phone1": "+91 98494 95335",
+    "phone2": "+91 88189 88199",
+    "website": "https://www.kietgroup.com",
+    "instagramUrl": "https://instagram.com/kiet.channel",
+    "youtubeUrl": "https://www.youtube.com/results?search_query=Kiet+Kakinada"
+  },
+  "footerLine": "© Kakinada Institute of Engineering and Technology (KIET) — Group of Institutions."
+}

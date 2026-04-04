@@ -1,0 +1,567 @@
+const path = require("path");
+const fs = require("fs");
+const express = require("express");
+const cookieParser = require("cookie-parser");
+const multer = require("multer");
+const PDFDocument = require("pdfkit");
+const store = require("./db");
+
+const ROOT = __dirname;
+const PUBLIC = path.join(ROOT, "public");
+const UPLOADS = path.join(PUBLIC, "uploads");
+
+const PORT = Number(process.env.PORT) || 3750;
+const COOKIE_SECRET = process.env.COOKIE_SECRET || "change-this-in-production";
+const ADMIN_PASSWORD_LEGACY = process.env.ADMIN_PASSWORD || "kiet-admin";
+const ADMIN_PASSWORD_FULL = process.env.ADMIN_PASSWORD_FULL || "Adminkie";
+const ADMIN_PASSWORD_VISI = process.env.ADMIN_PASSWORD_VISI || "Adminvisi";
+
+fs.mkdirSync(UPLOADS, { recursive: true });
+
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, UPLOADS);
+  },
+  filename: function (req, file, cb) {
+    const ext = path.extname(file.originalname || "") || "";
+    const base = "f-" + Date.now() + "-" + Math.random().toString(36).slice(2, 8);
+    cb(null, base + ext.toLowerCase());
+  },
+});
+
+const upload = multer({
+  storage,
+  limits: { fileSize: 80 * 1024 * 1024 },
+});
+
+const app = express();
+app.set("trust proxy", 1);
+app.use(express.json({ limit: "4mb" }));
+app.use(cookieParser(COOKIE_SECRET));
+
+function csvEscapeCell(v) {
+  const s = String(v ?? "");
+  if (/[",\n\r]/.test(s)) return '"' + s.replace(/"/g, '""') + '"';
+  return s;
+}
+
+function tableToCsv(headers, rows) {
+  const lines = [headers.map(csvEscapeCell).join(",")];
+  for (const row of rows) {
+    lines.push(row.map(csvEscapeCell).join(","));
+  }
+  return "\uFEFF" + lines.join("\n");
+}
+
+async function buildVisitorsSummary() {
+  const events = await store.listAnalyticsAll();
+  const by = {};
+  for (const e of events) {
+    const sid = e.sessionId || "unknown";
+    if (!by[sid]) by[sid] = { last: e.at || "", sections: {} };
+    if (e.at && String(e.at) > String(by[sid].last)) by[sid].last = e.at;
+    if (e.type === "section_view" && e.section) by[sid].sections[e.section] = true;
+    if (e.type === "route" && e.section) by[sid].sections[`page:${e.section}`] = true;
+  }
+  const sorted = Object.keys(by).sort((a, b) => String(by[b].last || "").localeCompare(String(by[a].last || "")));
+  const rows = sorted.map((sid) => {
+    const seen = Object.keys(by[sid].sections).sort().join(", ");
+    return [by[sid].last, seen || "—"];
+  });
+  const jsonArray = sorted.map((sid) => ({
+    lastVisit: by[sid].last,
+    pagesAndSectionsSeen: Object.keys(by[sid].sections).sort().join(", ") || "—",
+  }));
+  return {
+    table: {
+      title: "Visitors — last visit and pages seen",
+      headers: ["lastVisit", "pagesAndSectionsSeen"],
+      rows,
+      base: "visitors-summary",
+    },
+    jsonArray,
+  };
+}
+
+async function getExportTable(kind) {
+  if (kind === "analytics") {
+    return (await buildVisitorsSummary()).table;
+  }
+  if (kind === "admissions-page") {
+    const list = (await store.listAdmissionsAll()).filter((x) => x.source === "admissions_page");
+    const headers = ["id", "at", "fullName", "email", "phone", "dob", "stream", "branch", "city", "district"];
+    const rows = list.map((x) => headers.map((h) => x[h] ?? ""));
+    return { title: "Admissions page — completed submits", headers, rows, base: "admissions-page-submits" };
+  }
+  if (kind === "admissions-partial") {
+    const list = await store.listPartialsAll();
+    const headers = [
+      "when",
+      "email",
+      "phone",
+      "fullName",
+      "completionPercent",
+      "stream",
+      "branch",
+      "city",
+      "district",
+    ];
+    const rows = list.map((x) => {
+      const f = x.fields || {};
+      return [
+        x.at,
+        f.email ?? "",
+        f.phone ?? "",
+        f.fullName ?? "",
+        x.completionPercent,
+        f.stream ?? "",
+        f.branch ?? "",
+        f.city ?? "",
+        f.district ?? "",
+      ];
+    });
+    return { title: "Admissions — partial progress", headers, rows, base: "admissions-partial" };
+  }
+  if (kind === "apply-leads") {
+    const list = (await store.listAdmissionsAll()).filter((x) => x.source === "program_apply");
+    const headers = ["id", "at", "name", "phone", "email", "dob", "branch", "stream"];
+    const rows = list.map((x) => headers.map((h) => x[h] ?? ""));
+    return { title: "Program Apply now leads", headers, rows, base: "program-apply-leads" };
+  }
+  return null;
+}
+
+function sendExportPdf(res, { title, headers, rows, base }) {
+  const filename = `${base}.pdf`;
+  res.setHeader("Content-Type", "application/pdf");
+  res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
+  const doc = new PDFDocument({ margin: 40, size: "A4" });
+  doc.pipe(res);
+  doc.fontSize(14).text(title, { underline: true });
+  doc.moveDown(0.4);
+  doc.fontSize(9).fillColor("#555").text(`Rows: ${rows.length} · ${new Date().toISOString()}`);
+  doc.moveDown(0.6);
+  doc.fillColor("#000");
+  const maxRows = Math.min(rows.length, 450);
+  const compact = headers.length <= 2;
+  for (let i = 0; i < maxRows; i++) {
+    const r = rows[i];
+    if (compact) {
+      doc.fontSize(7).fillColor("#555").text("Last visit: " + String(r[0] ?? ""));
+      doc.moveDown(0.2);
+      doc.fontSize(7).text("Pages / sections seen:");
+      doc.fontSize(8).fillColor("#111").text(String(r[1] ?? ""), { width: 515, lineGap: 1.5 });
+      doc.fillColor("#000").moveDown(0.45);
+    } else {
+      headers.forEach((h, j) => {
+        const val = String(r[j] ?? "").slice(0, 400);
+        doc.fontSize(7).text(`${h}: ${val}`, { width: 515, lineGap: 0.5 });
+      });
+      doc.moveDown(0.25);
+    }
+    if (doc.y > 760) doc.addPage();
+  }
+  if (rows.length > maxRows) {
+    doc.moveDown(0.5);
+    doc.fontSize(9).text(`… ${rows.length - maxRows} more rows — use CSV or JSON for the full export.`);
+  }
+  doc.end();
+}
+
+function getRole(req) {
+  const r = req.signedCookies.kiet_role;
+  if (r === "full" || r === "visi") return r;
+  return null;
+}
+
+function requireFullAdmin(req, res, next) {
+  if (getRole(req) === "full") return next();
+  return res.status(401).json({ error: "Unauthorized" });
+}
+
+function requireAnyAdmin(req, res, next) {
+  const role = getRole(req);
+  if (role === "full" || role === "visi") return next();
+  return res.status(401).json({ error: "Unauthorized" });
+}
+
+function resolveLoginPassword(password) {
+  if (!password || typeof password !== "string") return null;
+  const raw = password.trim();
+  const lower = raw.toLowerCase();
+  if (lower === String(ADMIN_PASSWORD_VISI).toLowerCase() || lower === "adminvisi") return "visi";
+  if (
+    lower === String(ADMIN_PASSWORD_FULL).toLowerCase() ||
+    lower === "adminkie" ||
+    raw === ADMIN_PASSWORD_LEGACY
+  )
+    return "full";
+  return null;
+}
+
+const publicCors = process.env.PUBLIC_SITE_ORIGIN;
+if (publicCors) {
+  app.use((req, res, next) => {
+    if (req.path.startsWith("/api/")) {
+      res.setHeader("Access-Control-Allow-Origin", publicCors);
+      res.setHeader("Access-Control-Allow-Credentials", "true");
+      res.setHeader("Access-Control-Allow-Methods", "GET,POST,PUT,OPTIONS");
+      res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+      if (req.method === "OPTIONS") return res.sendStatus(204);
+    }
+    next();
+  });
+}
+
+app.post("/api/login", (req, res) => {
+  const rawPwd = req.body && typeof req.body.password === "string" ? req.body.password.trim() : "";
+  const role = resolveLoginPassword(rawPwd);
+  if (!role) {
+    return res.status(401).json({ error: "Wrong password" });
+  }
+  const secure = process.env.NODE_ENV === "production" || !!publicCors;
+  res.cookie("kiet_role", role, {
+    httpOnly: true,
+    signed: true,
+    path: "/",
+    maxAge: 7 * 24 * 60 * 60 * 1000,
+    sameSite: publicCors ? "none" : "lax",
+    secure,
+  });
+  return res.json({ ok: true, role });
+});
+
+app.post("/api/logout", (req, res) => {
+  const secure = process.env.NODE_ENV === "production" || !!publicCors;
+  res.clearCookie("kiet_role", {
+    signed: true,
+    path: "/",
+    sameSite: publicCors ? "none" : "lax",
+    secure,
+  });
+  res.json({ ok: true });
+});
+
+app.get("/api/me", (req, res) => {
+  const role = getRole(req);
+  res.json({ ok: !!role, role: role || null });
+});
+
+app.get("/api/site", async (req, res) => {
+  try {
+    res.json(await store.readSite());
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: "server" });
+  }
+});
+
+app.put("/api/site", requireFullAdmin, async (req, res) => {
+  try {
+    await store.writeSite(req.body);
+    res.json({ ok: true });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: "server" });
+  }
+});
+
+app.post("/api/upload", requireFullAdmin, upload.single("file"), (req, res) => {
+  if (!req.file) return res.status(400).json({ error: "No file" });
+  const url = "/uploads/" + req.file.filename;
+  res.json({ ok: true, url, filename: req.file.filename });
+});
+
+app.post("/api/analytics", async (req, res) => {
+  try {
+    const b = req.body || {};
+    const row = {
+      id: "a-" + Date.now() + "-" + Math.random().toString(36).slice(2, 7),
+      at: new Date().toISOString(),
+      type: String(b.type || "event").slice(0, 64),
+      sessionId: String(b.sessionId || "").slice(0, 120),
+      section: String(b.section || "").slice(0, 64),
+      payload: typeof b.payload === "object" && b.payload ? b.payload : {},
+      ip: req.ip || "",
+      ua: String(req.headers["user-agent"] || "").slice(0, 400),
+    };
+    await store.appendAnalytics(row);
+    res.json({ ok: true });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: "server" });
+  }
+});
+
+app.post("/api/admissions/full", async (req, res) => {
+  try {
+    const b = req.body || {};
+    const row = {
+      id: "adm-" + Date.now(),
+      at: new Date().toISOString(),
+      sessionId: String(b.sessionId || ""),
+      fullName: String(b.fullName || "").trim(),
+      email: String(b.email || "").trim(),
+      dob: String(b.dob || "").trim(),
+      stream: String(b.stream || "").trim(),
+      branch: String(b.branch || "").trim(),
+      phone: String(b.phone || "").trim(),
+      city: String(b.city || "").trim(),
+      district: String(b.district || "").trim(),
+      source: "admissions_page",
+    };
+    await store.appendAdmission(row);
+    res.json({ ok: true });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: "server" });
+  }
+});
+
+app.post("/api/admissions/partial", async (req, res) => {
+  try {
+    const b = req.body || {};
+    const sessionId = String(b.sessionId || "");
+    if (!sessionId) return res.status(400).json({ error: "session" });
+    const row = {
+      id: "par-" + Date.now(),
+      at: new Date().toISOString(),
+      sessionId,
+      completionPercent: Math.min(100, Math.max(0, Number(b.completionPercent) || 0)),
+      fields: typeof b.fields === "object" && b.fields ? b.fields : {},
+      page: String(b.page || "admissions"),
+    };
+    await store.appendPartial(row);
+    res.json({ ok: true });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: "server" });
+  }
+});
+
+app.post("/api/apply-branch", async (req, res) => {
+  try {
+    const b = req.body || {};
+    const row = {
+      id: "br-" + Date.now(),
+      at: new Date().toISOString(),
+      sessionId: String(b.sessionId || ""),
+      name: String(b.name || "").trim(),
+      phone: String(b.phone || "").trim(),
+      email: String(b.email || "").trim(),
+      dob: String(b.dob || "").trim(),
+      branch: String(b.branch || "").trim(),
+      stream: String(b.stream || "").trim(),
+      source: "program_apply",
+    };
+    await store.appendAdmission(row);
+    res.json({ ok: true });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: "server" });
+  }
+});
+
+app.post("/api/chat", async (req, res) => {
+  try {
+    const b = req.body || {};
+    const sessionId = String(b.sessionId || "").slice(0, 120);
+    if (!sessionId) return res.status(400).json({ error: "session" });
+    const text = String(b.message || "").trim().slice(0, 2000);
+    if (!text) return res.status(400).json({ error: "message" });
+    const row = {
+      id: "ch-" + Date.now() + "-" + Math.random().toString(36).slice(2, 6),
+      at: new Date().toISOString(),
+      sessionId,
+      role: "visitor",
+      body: text,
+      readByAdmin: false,
+    };
+    await store.appendChat(row);
+    return res.json({ ok: true, id: row.id });
+  } catch (err) {
+    console.error("chat write", err);
+    return res.status(500).json({ error: "server" });
+  }
+});
+
+app.get("/api/chat/poll", async (req, res) => {
+  try {
+    const sessionId = String(req.query.sessionId || "").slice(0, 120);
+    if (!sessionId) return res.status(400).json({ error: "session" });
+    const after = String(req.query.after || "");
+    let list = (await store.listChatAll()).filter((m) => m.sessionId === sessionId);
+    if (after) {
+      const idx = list.findIndex((m) => m.id === after);
+      list = idx >= 0 ? list.slice(idx + 1) : list;
+    }
+    res.json({ messages: list.slice(-200) });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: "server" });
+  }
+});
+
+app.get("/api/admin/chat", requireAnyAdmin, async (req, res) => {
+  try {
+    const list = await store.listChatAll();
+    const bySession = {};
+    list.forEach((m) => {
+      const sid = m.sessionId || "x";
+      if (!bySession[sid]) bySession[sid] = { sessionId: sid, messages: [], unread: 0, lastAt: m.at };
+      bySession[sid].messages.push(m);
+      if (m.at > bySession[sid].lastAt) bySession[sid].lastAt = m.at;
+      if (m.role === "visitor" && !m.readByAdmin) bySession[sid].unread += 1;
+    });
+    const sessions = Object.values(bySession)
+      .map((s) => ({
+        sessionId: s.sessionId,
+        lastAt: s.lastAt,
+        unread: s.unread,
+        preview: (s.messages[s.messages.length - 1] || {}).body || "",
+      }))
+      .sort((a, b) => String(b.lastAt).localeCompare(String(a.lastAt)));
+    res.json({ sessions, totalUnread: sessions.reduce((n, s) => n + s.unread, 0) });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: "server" });
+  }
+});
+
+app.get("/api/admin/chat/thread", requireAnyAdmin, async (req, res) => {
+  try {
+    const sessionId = String(req.query.sessionId || "").slice(0, 120);
+    if (!sessionId) return res.status(400).json({ error: "session" });
+    const markRead = req.query.markRead !== "0";
+    if (markRead) await store.markChatVisitorRead(sessionId);
+    const fresh = await store.listChatAll();
+    res.json({ messages: fresh.filter((m) => m.sessionId === sessionId) });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: "server" });
+  }
+});
+
+app.post("/api/admin/chat/reply", requireAnyAdmin, async (req, res) => {
+  try {
+    const b = req.body || {};
+    const sessionId = String(b.sessionId || "").slice(0, 120);
+    const text = String(b.message || "").trim().slice(0, 2000);
+    if (!sessionId || !text) return res.status(400).json({ error: "bad" });
+    const row = {
+      id: "ch-" + Date.now() + "-" + Math.random().toString(36).slice(2, 6),
+      at: new Date().toISOString(),
+      sessionId,
+      role: "admin",
+      body: text,
+      readByAdmin: true,
+    };
+    await store.appendChat(row);
+    res.json({ ok: true, id: row.id });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: "server" });
+  }
+});
+
+app.get("/api/admin/updates", requireAnyAdmin, async (req, res) => {
+  try {
+    const chatList = await store.listChatAll();
+    const totalUnread = chatList.filter((m) => m.role === "visitor" && !m.readByAdmin).length;
+    const analytics = await store.listAnalyticsAll();
+    const admissionsFull = await store.listAdmissionsAll();
+    const admissionsPartial = await store.listPartialsAll();
+    res.json({
+      analytics: analytics.slice(-2500),
+      admissionsFull: admissionsFull.slice(-500),
+      admissionsPartial: admissionsPartial.slice(-1500),
+      chatUnread: totalUnread,
+    });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: "server" });
+  }
+});
+
+app.get("/api/admin/export/:kind", requireAnyAdmin, async (req, res) => {
+  try {
+    const kind = String(req.params.kind || "");
+    const fmt = String(req.query.fmt || "json").toLowerCase();
+    const table = await getExportTable(kind);
+    if (!table) return res.status(404).json({ error: "unknown export" });
+
+    if (fmt === "json") {
+      let data;
+      if (kind === "analytics") data = (await buildVisitorsSummary()).jsonArray;
+      else if (kind === "admissions-page") {
+        data = (await store.listAdmissionsAll()).filter((x) => x.source === "admissions_page");
+      } else if (kind === "admissions-partial") {
+        data = (await store.listPartialsAll()).map((x) => {
+          const f = x.fields || {};
+          return {
+            when: x.at,
+            email: f.email || "",
+            phone: f.phone || "",
+            fullName: f.fullName || "",
+            completionPercent: x.completionPercent,
+            stream: f.stream || "",
+            branch: f.branch || "",
+            city: f.city || "",
+            district: f.district || "",
+          };
+        });
+      } else {
+        data = (await store.listAdmissionsAll()).filter((x) => x.source === "program_apply");
+      }
+      res.setHeader("Content-Type", "application/json; charset=utf-8");
+      res.setHeader("Content-Disposition", `attachment; filename="${table.base}.json"`);
+      return res.send(JSON.stringify(data, null, 2));
+    }
+    if (fmt === "csv") {
+      const csv = tableToCsv(table.headers, table.rows);
+      res.setHeader("Content-Type", "text/csv; charset=utf-8");
+      res.setHeader("Content-Disposition", `attachment; filename="${table.base}.csv"`);
+      return res.send(csv);
+    }
+    if (fmt === "gsheets") {
+      const csv = tableToCsv(table.headers, table.rows);
+      res.setHeader("Content-Type", "text/csv; charset=utf-8");
+      res.setHeader(
+        "Content-Disposition",
+        `attachment; filename="${table.base}-google-sheets.csv"`
+      );
+      return res.send(csv);
+    }
+    if (fmt === "pdf") {
+      return sendExportPdf(res, table);
+    }
+    return res.status(400).json({ error: "bad format" });
+  } catch (err) {
+    console.error("export", err);
+    return res.status(500).json({ error: "export failed" });
+  }
+});
+
+app.post("/api/admin/chat/clear", requireFullAdmin, async (req, res) => {
+  try {
+    await store.clearChat();
+    res.json({ ok: true });
+  } catch (err) {
+    console.error("chat clear", err);
+    res.status(500).json({ error: "clear failed" });
+  }
+});
+
+app.use(express.static(PUBLIC));
+app.use("/admin", express.static(path.join(ROOT, "admin")));
+
+store.maybeWipeChatOnStart().catch((e) => console.error(e));
+
+app.listen(PORT, () => {
+  console.log("College site:  http://localhost:" + PORT + "/");
+  console.log("Admin:         http://localhost:" + PORT + "/admin/");
+  console.log("Data backend:  " + store.backend + (store.backend === "mysql" ? " (DATABASE_URL / MYSQL*)" : " (JSON files under data/)"));
+  if (process.env.WIPE_CHAT_ON_RESTART !== "1") {
+    console.log("Tip: Set WIPE_CHAT_ON_RESTART=1 to clear chat on each deploy, or use Admin → Clear all chat history.");
+  }
+});

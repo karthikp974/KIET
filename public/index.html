@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>KIET</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Source+Sans+3:wght@400;600;700&family=Source+Serif+4:opsz,wght@8..60,600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/css/styles.css" />
+  </head>
+  <body>
+    <a class="skip" href="#route-home">Skip to content</a>
+
+    <div id="app">
+      <section class="hero-full" id="top">
+        <div class="hero-full-bg" id="hero-bg" aria-hidden="true"></div>
+        <div class="hero-full-overlay hero-overlay-dark">
+          <div class="hero-full-inner">
+            <div class="hero-intro" id="hero-intro" aria-hidden="true">
+              <p class="hero-line1" id="hero-line1"></p>
+              <div class="hero-type-line">
+                <span class="hero-emp" id="hero-emp"></span><span class="hero-pwr hero-mix" id="hero-pwr">POWER</span>
+              </div>
+              <p class="hero-tagline" id="hero-tagline"></p>
+              <div class="hero-stat-row hero-stat-students">
+                <div class="hero-digit-box" id="hero-digits-left" aria-hidden="true"></div>
+                <span class="hero-stat-label hero-lbl-slide" id="hero-lbl-left-wrap"
+                  ><span id="hero-lbl-left">Students</span></span
+                >
+              </div>
+              <div class="hero-stat-row hero-stat-package">
+                <span class="hero-on-image hero-package-line" id="hero-package"></span>
+              </div>
+              <div class="hero-stat-row hero-stat-placements">
+                <div class="hero-digit-box" id="hero-digits-right" aria-hidden="true"></div>
+                <span class="hero-stat-label hero-lbl-slide" id="hero-lbl-right-wrap"
+                  ><span id="hero-lbl-right">Placements</span></span
+                >
+              </div>
+            </div>
+            <h1 class="hero-headline sr-only" id="hero-headline-fallback">Empowering future</h1>
+          </div>
+        </div>
+      </section>
+
+      <div class="dual-nav" id="dual-nav">
+        <div class="dual-nav-row dual-nav-sections-wrap section-marquee-bar" id="nav-marquee-row" data-show-home-only>
+          <div class="marquee marquee-section marquee-tilt-wrap fade-edges" id="section-marquee-wrap" aria-label="Sections on this page">
+            <div class="marquee-track marquee-pingpong" id="section-marquee"></div>
+          </div>
+        </div>
+        <div class="dual-nav-row dual-nav-pages nav-pages-bar thin-nav-row">
+          <div class="nav-pages-inner">
+            <nav class="nav-page-links" id="main-nav-links" aria-label="Pages">
+              <a href="#/" data-nav-page="home">Home</a>
+              <a href="#/about" data-nav-page="about">About us</a>
+              <a href="#/admissions" data-nav-page="admissions">Admissions</a>
+              <a href="#/contact" data-nav-page="contact">Contact</a>
+            </nav>
+          </div>
+        </div>
+      </div>
+
+      <div id="route-home" class="route route-home route-pad-top">
+        <section class="section" id="spotlight">
+          <h2 class="h-section">Campus spotlight</h2>
+          <p class="lead lead-tight">Open a story on its own page.</p>
+          <div class="spotlight-list spotlight-compact" id="spotlight-list"></div>
+        </section>
+
+        <section class="section" id="placements">
+          <h2 class="h-section">Placements</h2>
+          <div class="placements-marquee-wrap">
+            <div class="placements-marquee-track" id="placements-list"></div>
+          </div>
+        </section>
+
+        <section class="section" id="programs">
+          <h2 class="h-section">Academic programs</h2>
+          <div class="stream-picker" id="stream-picker"></div>
+          <div class="branch-grid branch-grid-hidden" id="branch-grid"></div>
+        </section>
+
+        <section class="section section-mou-wide" id="mou">
+          <h2 class="h-section">Industry MOU</h2>
+          <p class="lead lead-tight">Partners who work with us.</p>
+          <div class="mou-rows mou-rows-tight mou-ticker-shell" id="mou-rows"></div>
+        </section>
+
+        <section class="section" id="vision">
+          <h2 class="h-section">Visionaries</h2>
+          <div class="vision-grid" id="vision-grid"></div>
+        </section>
+      </div>
+
+      <div id="route-detail" class="route route-detail hidden route-pad-top">
+        <div class="detail-toolbar">
+          <button type="button" class="btn-text" id="detail-back">← Back</button>
+        </div>
+        <article class="detail-article" id="detail-root"></article>
+      </div>
+
+      <div id="route-about" class="route route-about hidden route-pad-top">
+        <section class="section page-block">
+          <p id="about-body" class="about-body"></p>
+        </section>
+        <section class="section">
+          <h2 class="h-section">Our clubs</h2>
+          <div class="clubs-grid" id="clubs-grid-about"></div>
+        </section>
+        <section class="section difference-wrap" id="difference">
+          <div class="diff-header">
+            <span class="diff-bar"></span>
+            <h2 class="h-section diff-title" id="diff-title">What makes us different?</h2>
+            <p class="lead" id="diff-sub"></p>
+          </div>
+          <div class="timeline">
+            <div class="timeline-line-bg"><div class="timeline-line-fill" id="timeline-fill"></div></div>
+            <div class="timeline-items" id="timeline-items"></div>
+          </div>
+        </section>
+      </div>
+
+      <div id="route-admissions" class="route route-admissions hidden route-pad-top">
+        <section class="section form-section page-block">
+          <h2 class="h-section">Admissions enquiry</h2>
+          <form class="adm-form" id="adm-form">
+            <label>Full name<input name="fullName" type="text" required /></label>
+            <label>Email<input name="email" type="email" required /></label>
+            <label>Date of birth<input name="dob" type="date" /></label>
+            <label>Stream<select name="stream" id="adm-stream"><option value="">Select stream</option></select></label>
+            <label>Branch<select name="branch" id="adm-branch"><option value="">Select branch</option></select></label>
+            <label>Phone<input name="phone" type="tel" /></label>
+            <label>City / Village<input name="city" type="text" /></label>
+            <label>District<input name="district" type="text" /></label>
+            <button type="submit" class="btn-primary" id="adm-submit">Submit</button>
+          </form>
+        </section>
+      </div>
+
+      <div id="route-contact" class="route route-contact hidden route-pad-top">
+        <section class="section contact-section page-block">
+          <h2 class="h-section">Contact</h2>
+          <div class="contact-grid">
+            <div class="contact-card">
+              <h3>Campus address</h3>
+              <pre id="contact-address" class="contact-pre"></pre>
+            </div>
+            <div class="contact-card">
+              <h3>General enquiry</h3>
+              <p>For admissions and general information.</p>
+              <p id="contact-phones"></p>
+            </div>
+            <div class="contact-card">
+              <h3>Connect with us</h3>
+              <ul class="contact-links" id="contact-links"></ul>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <footer class="site-footer">
+        <p id="footer-line"></p>
+        <nav class="footer-nav" aria-label="Footer">
+          <a href="#/about">About us</a>
+          <a href="#/admissions">Admissions</a>
+          <a href="#/contact">Contact</a>
+          <a href="/admin/">Staff admin</a>
+        </nav>
+      </footer>
+    </div>
+
+    <button type="button" class="to-top" id="to-top" aria-label="Back to top">
+      <span class="to-top-circle" aria-hidden="true"></span>
+      <svg class="to-top-arrow" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+        <path fill="currentColor" d="M12 4l-8 8h5v8h6v-8h5L12 4z" />
+      </svg>
+    </button>
+
+    <div class="fab-chat-sheet hidden" id="fab-chat-sheet" role="dialog" aria-modal="true" aria-labelledby="wa-chat-title">
+      <div class="wa-chat-header">
+        <span class="wa-chat-title" id="wa-chat-title">KIET</span>
+        <button type="button" class="wa-chat-close" id="chat-sheet-close" aria-label="Close chat">×</button>
+      </div>
+      <div class="wa-chat-body" id="chat-sheet-msgs"></div>
+      <form class="wa-chat-form" id="chat-sheet-form">
+        <input type="text" id="chat-sheet-input" placeholder="Type a message…" maxlength="2000" autocomplete="off" />
+        <button type="submit" class="wa-send">Send</button>
+      </form>
+    </div>
+
+    <div class="fab-wrap" id="fab-wrap">
+      <div class="fab-menu fab-menu-left hidden" id="fab-menu">
+        <button type="button" class="fab-opt" id="fab-chat" aria-label="Open chat">
+          <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
+            <path fill="currentColor" d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z" />
+          </svg>
+        </button>
+        <a class="fab-opt" id="fab-wa" href="#" target="_blank" rel="noopener" aria-label="WhatsApp">
+          <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
+            <path
+              fill="currentColor"
+              d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.435 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"
+            />
+          </svg>
+        </a>
+      </div>
+      <button type="button" class="fab-main" id="fab-main" aria-expanded="false" aria-label="Open WhatsApp and chat">
+        <span class="fab-dot"></span>
+      </button>
+    </div>
+
+    <div class="modal" id="apply-modal" aria-hidden="true">
+      <div class="modal-backdrop" data-close-apply></div>
+      <div class="modal-panel" role="dialog" aria-modal="true">
+        <button type="button" class="modal-x" data-close-apply aria-label="Close">×</button>
+        <h2 class="modal-title">Apply now</h2>
+        <form id="apply-form" class="adm-form">
+          <input type="hidden" name="stream" id="apply-stream" />
+          <input type="hidden" name="branch" id="apply-branch" />
+          <label>Name<input name="name" required /></label>
+          <label>Phone<input name="phone" type="tel" required /></label>
+          <label>Email<input name="email" type="email" required /></label>
+          <label>Date of birth<input name="dob" type="date" /></label>
+          <p class="apply-branch-lbl" id="apply-branch-lbl"></p>
+          <button type="submit" class="btn-primary">Submit</button>
+        </form>
+      </div>
+    </div>
+
+    <script src="/js/main.js"></script>
+  </body>
+</html>

@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>KIET Admin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="css/admin.css" />
+  </head>
+  <body>
+    <header class="admin-top">
+      <a href="/" target="_blank" rel="noopener" class="btn-link">Open college site</a>
+      <div class="admin-top-right">
+        <span class="chat-badge hidden" id="chat-badge" title="Unread chat">0</span>
+        <span id="save-status"></span>
+        <button type="button" class="btn primary hidden" id="btn-save-all">Save website</button>
+        <button type="button" class="btn ghost" id="btn-out">Sign out</button>
+      </div>
+    </header>
+
+    <div class="admin-wrap">
+      <div id="login-panel">
+        <h1>Admin sign-in</h1>
+        <input type="password" id="pw" placeholder="Password" autocomplete="current-password" />
+        <button type="button" class="btn primary" id="btn-in">Sign in</button>
+        <p class="err" id="login-err"></p>
+      </div>
+
+      <div id="main-panel" class="hidden">
+        <nav class="admin-tabs" id="main-tabs">
+          <button type="button" data-tab="t-home" class="on tab-full">Homepage content</button>
+          <button type="button" data-tab="t-pages" class="tab-full">About · Admissions · Contact</button>
+          <button type="button" data-tab="t-pro" class="tab-full">Programs (JSON)</button>
+          <button type="button" data-tab="t-up" class="tab-all">Visitors &amp; forms</button>
+          <button type="button" data-tab="t-chat" class="tab-all">Live chat</button>
+        </nav>
+
+        <section class="tab-panel on" id="t-home">
+          <details class="page-acc" open>
+            <summary>Hero &amp; branding</summary>
+            <div class="page-acc-body">
+              <div class="up-row">
+                <label>Hero photo</label>
+                <input type="file" accept="image/*,video/*" data-upload-target="hero-image" />
+                <input type="text" id="hero-image" class="grow" placeholder="/images/hero.png" />
+              </div>
+              <label>Top line (e.g. Future Ready.)<input type="text" id="hero-line1" placeholder="Future Ready." /></label>
+              <label>Tagline under headline<textarea id="hero-tagline" rows="2" placeholder="Short paragraph…"></textarea></label>
+              <label>Headline (accessibility)<input type="text" id="hero-headline" /></label>
+              <label>Left stat value<input type="text" id="hero-sv-l" /></label>
+              <label>Left stat label<input type="text" id="hero-sl-l" /></label>
+              <label>Right stat value<input type="text" id="hero-sv-r" /></label>
+              <label>Right stat label<input type="text" id="hero-sl-r" /></label>
+              <label>Package line<input type="text" id="hero-pkg" /></label>
+              <div class="up-row">
+                <label>Header logo</label>
+                <input type="file" accept="image/*" data-upload-target="menu-logo" />
+                <input type="text" id="menu-logo" class="grow" />
+              </div>
+              <label>College name<input type="text" id="college-name" /></label>
+              <label>Short name<input type="text" id="short-name" /></label>
+            </div>
+          </details>
+
+          <details class="page-acc" open>
+            <summary>Campus spotlight</summary>
+            <div class="page-acc-body">
+              <div id="campus-box"></div>
+              <button type="button" class="btn ghost" id="add-campus">+ Event</button>
+            </div>
+          </details>
+
+          <details class="page-acc">
+            <summary>Placements</summary>
+            <div class="page-acc-body">
+              <p class="hint">Photo preview is static; on the site it scrolls in the marquee below the text.</p>
+              <div id="place-box"></div>
+              <button type="button" class="btn ghost" id="add-place">+ Row</button>
+            </div>
+          </details>
+
+          <details class="page-acc">
+            <summary>Industry MOU</summary>
+            <div class="page-acc-body">
+              <div id="mou-box"></div>
+              <button type="button" class="btn ghost" id="add-mou">+ Partner</button>
+            </div>
+          </details>
+
+          <details class="page-acc">
+            <summary>Visionaries</summary>
+            <div class="page-acc-body">
+              <div id="vis-box"></div>
+              <button type="button" class="btn ghost" id="add-vis">+ Person</button>
+            </div>
+          </details>
+
+          <details class="page-acc">
+            <summary>Clubs (cover photo per club)</summary>
+            <div class="page-acc-body">
+              <div id="club-box"></div>
+              <button type="button" class="btn ghost" id="add-club">+ Club</button>
+            </div>
+          </details>
+
+          <details class="page-acc">
+            <summary>What makes us different</summary>
+            <div class="page-acc-body">
+              <label>Section title<input type="text" id="diff-title" /></label>
+              <label>Subtitle<input type="text" id="diff-sub" /></label>
+              <div id="diff-box"></div>
+              <button type="button" class="btn ghost" id="add-diff">+ Item</button>
+            </div>
+          </details>
+
+          <details class="page-acc">
+            <summary>Pixels, WhatsApp &amp; footer</summary>
+            <div class="page-acc-body">
+              <p class="hint">
+                <strong>What these IDs are:</strong> Short codes from Meta, Google, or Snap that let their systems recognize
+                <em>your</em> website when you run ads or want analytics (e.g. “how many people visited after seeing our
+                Instagram ad”). You only paste them if you use those platforms for marketing; otherwise leave empty.
+              </p>
+              <p class="hint">Meta = Facebook &amp; Instagram. Google tag = Search, YouTube, Display. Snap = Snapchat.</p>
+              <label>Meta Pixel ID<input type="text" id="px-meta" placeholder="numbers only" /></label>
+              <label>Google tag ID<input type="text" id="px-google" placeholder="AW-… or G-…" /></label>
+              <label>Snap Pixel ID<input type="text" id="px-snap" /></label>
+              <label>WhatsApp number (digits, country code)<input type="text" id="wa-num" /></label>
+              <label>Live chat URL (optional — if set, Chat button opens this instead)<input type="text" id="chat-url" placeholder="https://…" /></label>
+              <label>Footer line<input type="text" id="footer-line" /></label>
+            </div>
+          </details>
+        </section>
+
+        <section class="tab-panel" id="t-pages">
+          <details class="page-acc" open>
+            <summary>About page</summary>
+            <div class="page-acc-body">
+              <div class="up-row">
+                <label>Hero image</label>
+                <input type="file" accept="image/*,video/*" data-upload-target="about-hero" />
+                <input type="text" id="about-hero" class="grow" />
+              </div>
+              <label>About text (paragraphs)<textarea id="about-body" rows="6"></textarea></label>
+            </div>
+          </details>
+          <details class="page-acc">
+            <summary>Admissions page</summary>
+            <div class="page-acc-body">
+              <div class="up-row">
+                <label>Hero image</label>
+                <input type="file" accept="image/*,video/*" data-upload-target="adm-hero" />
+                <input type="text" id="adm-hero" class="grow" />
+              </div>
+            </div>
+          </details>
+          <details class="page-acc">
+            <summary>Contact page</summary>
+            <div class="page-acc-body">
+              <label>Address (multi-line)<textarea id="c-address" rows="4"></textarea></label>
+              <label>Phone 1<input type="text" id="c-p1" /></label>
+              <label>Phone 2<input type="text" id="c-p2" /></label>
+              <label>Website URL<input type="text" id="c-web" /></label>
+              <label>Instagram URL<input type="text" id="c-insta" /></label>
+              <label>YouTube URL<input type="text" id="c-yt" /></label>
+            </div>
+          </details>
+        </section>
+
+        <section class="tab-panel" id="t-pro">
+          <h2>Program streams &amp; branches</h2>
+          <p class="hint">Edit carefully. Each stream has <code>id</code>, <code>name</code>, and <code>branches</code> with <code>name</code>, <code>blurb</code>, <code>duration</code>, <code>image</code> (URL or /uploads/…).</p>
+          <textarea id="programs-json" rows="28" class="code"></textarea>
+        </section>
+
+        <section class="tab-panel" id="t-up">
+          <div class="up-section-head">
+            <h2>Visitors</h2>
+            <button type="button" class="btn ghost btn-dl" data-export="analytics">Download…</button>
+          </div>
+          <p class="hint">Sessions and sections viewed (from the public site).</p>
+          <div class="scroll-table" id="visitors-out"></div>
+
+          <div class="up-section-head">
+            <h2>Admissions — completed submits</h2>
+            <button type="button" class="btn ghost btn-dl" data-export="admissions-page">Download…</button>
+          </div>
+          <div class="scroll-table" id="adm-full-out"></div>
+
+          <div class="up-section-head">
+            <h2>Admissions — partial progress</h2>
+            <button type="button" class="btn ghost btn-dl" data-export="admissions-partial">Download…</button>
+          </div>
+          <p class="hint">Anyone who typed in the form (even one field). Shows completion %.</p>
+          <div class="scroll-table" id="adm-part-out"></div>
+
+          <div class="up-section-head">
+            <h2>Program “Apply now” leads</h2>
+            <button type="button" class="btn ghost btn-dl" data-export="apply-leads">Download…</button>
+          </div>
+          <div class="scroll-table" id="apply-out"></div>
+
+          <button type="button" class="btn ghost" id="btn-refresh-up">Refresh data</button>
+        </section>
+
+        <section class="tab-panel" id="t-chat">
+          <h2>Live chat</h2>
+          <p class="hint">Visitors who message from the site chat drawer appear here. Select a session to reply.</p>
+          <div class="chat-admin-layout">
+            <div class="chat-session-list scroll-table" id="chat-sessions"></div>
+            <div class="chat-thread-panel">
+              <div id="chat-thread-title" class="chat-thread-title">Select a session</div>
+              <div class="chat-thread-msgs" id="chat-thread-msgs"></div>
+              <form class="chat-reply-form hidden" id="chat-reply-form">
+                <textarea id="chat-reply-input" rows="2" placeholder="Reply to visitor…"></textarea>
+                <button type="submit" class="btn primary">Send reply</button>
+              </form>
+            </div>
+          </div>
+          <button type="button" class="btn ghost" id="btn-refresh-chat">Refresh chat</button>
+          <button type="button" class="btn ghost hidden" id="btn-clear-chat">Clear all chat history</button>
+        </section>
+      </div>
+    </div>
+
+    <div id="export-fmt-modal" class="export-fmt-modal hidden" aria-hidden="true">
+      <div class="export-fmt-backdrop" data-close-export></div>
+      <div class="export-fmt-panel" role="dialog" aria-modal="true" aria-labelledby="export-fmt-title">
+        <p id="export-fmt-title" class="export-fmt-title">Choose download format</p>
+        <p class="hint export-fmt-hint">
+          Pick one. <strong>Visitors</strong> = last visit + pages seen only. <strong>Google Sheets</strong> = same data as CSV (UTF‑8), ready for
+          <em>File → Import → Upload</em> in sheets.google.com. PDF may truncate; CSV / Sheets / JSON are full rows.
+        </p>
+        <div class="export-fmt-btns">
+          <button type="button" class="btn primary" data-pick-fmt="csv">Excel (CSV)</button>
+          <button type="button" class="btn primary" data-pick-fmt="gsheets">Google Sheets (CSV)</button>
+          <button type="button" class="btn primary" data-pick-fmt="pdf">PDF</button>
+          <button type="button" class="btn ghost" data-pick-fmt="json">JSON</button>
+        </div>
+        <button type="button" class="btn ghost export-fmt-cancel" data-close-export>Cancel</button>
+      </div>
+    </div>
+
+    <button type="button" class="admin-to-top" id="admin-to-top" title="Top">↑</button>
+    <script src="js/admin.js"></script>
+  </body>
+</html>

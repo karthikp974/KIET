@@ -1,0 +1,14 @@
+{
+  "buildCommand": "node scripts/vercel-build.js",
+  "outputDirectory": "public",
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "https://REPLACE_WITH_YOUR_RAILWAY_APP_URL.up.railway.app/api/:path*"
+    },
+    {
+      "source": "/uploads/:path*",
+      "destination": "https://REPLACE_WITH_YOUR_RAILWAY_APP_URL.up.railway.app/uploads/:path*"
+    }
+  ]
+}

@@ -1,0 +1,28 @@
+[
+  {
+    "id": "br-1775322189395",
+    "at": "2026-04-04T17:03:09.395Z",
+    "sessionId": "s-1775322014769-r8wzkxhl95",
+    "name": "KARTHIK",
+    "phone": "07032686937",
+    "email": "nukalapavankarthik@gmail.com",
+    "dob": "",
+    "branch": "Artificial Intelligence",
+    "stream": "B.Tech",
+    "source": "program_apply"
+  },
+  {
+    "id": "adm-1775333838025",
+    "at": "2026-04-04T20:17:18.025Z",
+    "sessionId": "s-1775322014769-r8wzkxhl95",
+    "fullName": "frt",
+    "email": "tf@gmail.com",
+    "dob": "0064-11-11",
+    "stream": "mtech",
+    "branch": "Artificial Intelligence",
+    "phone": "07032686937",
+    "city": "Amalapuram",
+    "district": "EG",
+    "source": "admissions_page"
+  }
+]

@@ -1,0 +1,7 @@
+node_modules/
+public/admin/
+
+# Never commit passwords or database URLs
+.env
+.env.*
+!.env.example

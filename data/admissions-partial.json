@@ -1,0 +1,240 @@
+[
+  {
+    "id": "par-1775322227086",
+    "at": "2026-04-04T17:03:47.086Z",
+    "sessionId": "s-1775322014769-r8wzkxhl95",
+    "completionPercent": 13,
+    "fields": {
+      "fullName": "",
+      "email": "t",
+      "dob": "",
+      "stream": "",
+      "branch": "",
+      "phone": "",
+      "city": "",
+      "district": ""
+    },
+    "page": "admissions"
+  },
+  {
+    "id": "par-1775322228115",
+    "at": "2026-04-04T17:03:48.115Z",
+    "sessionId": "s-1775322014769-r8wzkxhl95",
+    "completionPercent": 13,
+    "fields": {
+      "fullName": "",
+      "email": "tf",
+      "dob": "",
+      "stream": "",
+      "branch": "",
+      "phone": "",
+      "city": "",
+      "district": ""
+    },
+    "page": "admissions"
+  },
+  {
+    "id": "par-1775322285404",
+    "at": "2026-04-04T17:04:45.404Z",
+    "sessionId": "s-1775322014769-r8wzkxhl95",
+    "completionPercent": 25,
+    "fields": {
+      "fullName": "frt",
+      "email": "tf",
+      "dob": "",
+      "stream": "",
+      "branch": "",
+      "phone": "",
+      "city": "",
+      "district": ""
+    },
+    "page": "admissions"
+  },
+  {
+    "id": "par-1775322289165",
+    "at": "2026-04-04T17:04:49.165Z",
+    "sessionId": "s-1775322014769-r8wzkxhl95",
+    "completionPercent": 38,
+    "fields": {
+      "fullName": "frt",
+      "email": "tf",
+      "dob": "",
+      "stream": "btech",
+      "branch": "",
+      "phone": "",
+      "city": "",
+      "district": ""
+    },
+    "page": "admissions"
+  },
+  {
+    "id": "par-1775322292544",
+    "at": "2026-04-04T17:04:52.544Z",
+    "sessionId": "s-1775322014769-r8wzkxhl95",
+    "completionPercent": 50,
+    "fields": {
+      "fullName": "frt",
+      "email": "tf",
+      "dob": "",
+      "stream": "btech",
+      "branch": "AI & Machine Learning",
+      "phone": "",
+      "city": "",
+      "district": ""
+    },
+    "page": "admissions"
+  },
+  {
+    "id": "par-1775322334609",
+    "at": "2026-04-04T17:05:34.609Z",
+    "sessionId": "s-1775322014769-r8wzkxhl95",
+    "completionPercent": 50,
+    "fields": {
+      "fullName": "frt",
+      "email": "tf@",
+      "dob": "",
+      "stream": "btech",
+      "branch": "AI & Machine Learning",
+      "phone": "",
+      "city": "",
+      "district": ""
+    },
+    "page": "admissions"
+  },
+  {
+    "id": "par-1775322337810",
+    "at": "2026-04-04T17:05:37.810Z",
+    "sessionId": "s-1775322014769-r8wzkxhl95",
+    "completionPercent": 50,
+    "fields": {
+      "fullName": "frt",
+      "email": "tf@gmail",
+      "dob": "",
+      "stream": "btech",
+      "branch": "AI & Machine Learning",
+      "phone": "",
+      "city": "",
+      "district": ""
+    },
+    "page": "admissions"
+  },
+  {
+    "id": "par-1775322339641",
+    "at": "2026-04-04T17:05:39.641Z",
+    "sessionId": "s-1775322014769-r8wzkxhl95",
+    "completionPercent": 50,
+    "fields": {
+      "fullName": "frt",
+      "email": "tf@gmail.com",
+      "dob": "",
+      "stream": "btech",
+      "branch": "AI & Machine Learning",
+      "phone": "",
+      "city": "",
+      "district": ""
+    },
+    "page": "admissions"
+  },
+  {
+    "id": "par-1775322348104",
+    "at": "2026-04-04T17:05:48.104Z",
+    "sessionId": "s-1775322014769-r8wzkxhl95",
+    "completionPercent": 63,
+    "fields": {
+      "fullName": "frt",
+      "email": "tf@gmail.com",
+      "dob": "0064-11-11",
+      "stream": "btech",
+      "branch": "AI & Machine Learning",
+      "phone": "",
+      "city": "",
+      "district": ""
+    },
+    "page": "admissions"
+  },
+  {
+    "id": "par-1775333827484",
+    "at": "2026-04-04T20:17:07.484Z",
+    "sessionId": "s-1775322014769-r8wzkxhl95",
+    "completionPercent": 38,
+    "fields": {
+      "fullName": "frt",
+      "email": "tf@gmail.com",
+      "dob": "0064-11-11",
+      "stream": "",
+      "branch": "",
+      "phone": "",
+      "city": "",
+      "district": ""
+    },
+    "page": "admissions"
+  },
+  {
+    "id": "par-1775333830438",
+    "at": "2026-04-04T20:17:10.438Z",
+    "sessionId": "s-1775322014769-r8wzkxhl95",
+    "completionPercent": 50,
+    "fields": {
+      "fullName": "frt",
+      "email": "tf@gmail.com",
+      "dob": "0064-11-11",
+      "stream": "mtech",
+      "branch": "",
+      "phone": "",
+      "city": "",
+      "district": ""
+    },
+    "page": "admissions"
+  },
+  {
+    "id": "par-1775333831949",
+    "at": "2026-04-04T20:17:11.949Z",
+    "sessionId": "s-1775322014769-r8wzkxhl95",
+    "completionPercent": 63,
+    "fields": {
+      "fullName": "frt",
+      "email": "tf@gmail.com",
+      "dob": "0064-11-11",
+      "stream": "mtech",
+      "branch": "Artificial Intelligence",
+      "phone": "",
+      "city": "",
+      "district": ""
+    },
+    "page": "admissions"
+  },
+  {
+    "id": "par-1775333834428",
+    "at": "2026-04-04T20:17:14.428Z",
+    "sessionId": "s-1775322014769-r8wzkxhl95",
+    "completionPercent": 88,
+    "fields": {
+      "fullName": "frt",
+      "email": "tf@gmail.com",
+      "dob": "0064-11-11",
+      "stream": "mtech",
+      "branch": "Artificial Intelligence",
+      "phone": "07032686937",
+      "city": "Amalapuram",
+      "district": ""
+    },
+    "page": "admissions"
+  },
+  {
+    "id": "par-1775333837508",
+    "at": "2026-04-04T20:17:17.508Z",
+    "sessionId": "s-1775322014769-r8wzkxhl95",
+    "completionPercent": 100,
+    "fields": {
+      "fullName": "frt",
+      "email": "tf@gmail.com",
+      "dob": "0064-11-11",
+      "stream": "mtech",
+      "branch": "Artificial Intelligence",
+      "phone": "07032686937",
+      "city": "Amalapuram",
+      "district": "EG"
+    },
+    "page": "admissions"
+  }
+]

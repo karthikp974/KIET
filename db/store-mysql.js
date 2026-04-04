@@ -1,0 +1,269 @@
+const mysql = require("mysql2/promise");
+
+const MAX_EVENTS = 20000;
+const MAX_ADMISSIONS = 5000;
+const MAX_CHAT = 8000;
+
+function poolConfig() {
+  if (process.env.DATABASE_URL) {
+    return process.env.DATABASE_URL;
+  }
+  return {
+    host: process.env.MYSQLHOST,
+    user: process.env.MYSQLUSER,
+    password: process.env.MYSQLPASSWORD || "",
+    database: process.env.MYSQLDATABASE || process.env.MYSQL_DATABASE,
+    port: Number(process.env.MYSQLPORT) || 3306,
+    ssl: process.env.MYSQL_SSL_DISABLE === "1" ? false : { rejectUnauthorized: false },
+  };
+}
+
+let pool;
+
+function getPool() {
+  if (!pool) {
+    pool = mysql.createPool({ ...poolConfig(), waitForConnections: true, connectionLimit: 10 });
+  }
+  return pool;
+}
+
+function iso(d) {
+  if (!d) return new Date().toISOString();
+  if (d instanceof Date) return d.toISOString();
+  return String(d);
+}
+
+function rowAnalytics(r) {
+  let payload = r.payload;
+  if (typeof payload === "string") {
+    try {
+      payload = JSON.parse(payload || "{}");
+    } catch {
+      payload = {};
+    }
+  }
+  return {
+    id: r.id,
+    at: iso(r.at),
+    type: r.type,
+    sessionId: r.session_id,
+    section: r.section,
+    payload: payload && typeof payload === "object" ? payload : {},
+    ip: r.ip || "",
+    ua: r.ua || "",
+  };
+}
+
+function rowAdmission(r) {
+  return {
+    id: r.id,
+    at: iso(r.at),
+    source: r.source,
+    sessionId: r.session_id || "",
+    fullName: r.full_name || "",
+    email: r.email || "",
+    dob: r.dob || "",
+    stream: r.stream || "",
+    branch: r.branch || "",
+    phone: r.phone || "",
+    city: r.city || "",
+    district: r.district || "",
+    name: r.name || "",
+  };
+}
+
+function rowPartial(r) {
+  let fields = r.fields;
+  if (typeof fields === "string") {
+    try {
+      fields = JSON.parse(fields || "{}");
+    } catch {
+      fields = {};
+    }
+  }
+  return {
+    id: r.id,
+    at: iso(r.at),
+    sessionId: r.session_id,
+    completionPercent: r.completion_percent,
+    page: r.page || "admissions",
+    fields: fields && typeof fields === "object" ? fields : {},
+  };
+}
+
+function rowChat(r) {
+  return {
+    id: r.id,
+    at: iso(r.at),
+    sessionId: r.session_id,
+    role: r.role,
+    body: r.body,
+    readByAdmin: Boolean(r.read_by_admin),
+  };
+}
+
+async function trimOldest(table, max) {
+  const p = getPool();
+  const [c] = await p.execute(`SELECT COUNT(*) AS n FROM ${table}`);
+  const n = c[0].n;
+  const excess = n - max;
+  if (excess <= 0) return;
+  await p.execute(
+    `DELETE FROM ${table} WHERE id IN (SELECT id FROM (SELECT id FROM ${table} ORDER BY at ASC, id ASC LIMIT ?) t)`,
+    [excess]
+  );
+}
+
+async function readSite() {
+  const [rows] = await getPool().execute("SELECT json_data FROM site_config WHERE id = 1 LIMIT 1");
+  if (!rows.length) return {};
+  let raw = rows[0].json_data;
+  if (Buffer.isBuffer(raw)) raw = raw.toString("utf8");
+  if (raw != null && typeof raw === "object") return raw;
+  return JSON.parse(String(raw || "{}"));
+}
+
+async function writeSite(obj) {
+  const json = JSON.stringify(obj, null, 2);
+  await getPool().execute("UPDATE site_config SET json_data = ?, updated_at = CURRENT_TIMESTAMP(3) WHERE id = 1", [
+    json,
+  ]);
+}
+
+async function appendAnalytics(row) {
+  const p = getPool();
+  await p.execute(
+    `INSERT INTO analytics_events (id, at, type, session_id, section, payload, ip, ua)
+     VALUES (?, ?, ?, ?, ?, CAST(? AS JSON), ?, ?)`,
+    [
+      row.id,
+      row.at,
+      row.type,
+      row.sessionId,
+      row.section,
+      JSON.stringify(row.payload || {}),
+      row.ip || "",
+      row.ua || "",
+    ]
+  );
+  await trimOldest("analytics_events", MAX_EVENTS);
+}
+
+async function listAnalyticsAll() {
+  const [rows] = await getPool().execute(
+    "SELECT id, at, type, session_id, section, payload, ip, ua FROM analytics_events ORDER BY at ASC, id ASC"
+  );
+  return rows.map(rowAnalytics);
+}
+
+async function appendAdmission(row) {
+  const p = getPool();
+  await p.execute(
+    `INSERT INTO admissions (id, at, source, session_id, full_name, email, dob, stream, branch, phone, city, district, name)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    [
+      row.id,
+      row.at,
+      row.source,
+      row.sessionId || "",
+      row.fullName || "",
+      row.email || "",
+      row.dob || "",
+      row.stream || "",
+      row.branch || "",
+      row.phone || "",
+      row.city || "",
+      row.district || "",
+      row.name || "",
+    ]
+  );
+  await trimOldest("admissions", MAX_ADMISSIONS);
+}
+
+async function listAdmissionsAll() {
+  const [rows] = await getPool().execute(
+    "SELECT id, at, source, session_id, full_name, email, dob, stream, branch, phone, city, district, name FROM admissions ORDER BY at ASC, id ASC"
+  );
+  return rows.map(rowAdmission);
+}
+
+async function appendPartial(row) {
+  const p = getPool();
+  await p.execute(
+    `INSERT INTO admissions_partial (id, at, session_id, completion_percent, page, fields)
+     VALUES (?, ?, ?, ?, ?, CAST(? AS JSON))`,
+    [row.id, row.at, row.sessionId, row.completionPercent, row.page || "admissions", JSON.stringify(row.fields || {})]
+  );
+  await trimOldest("admissions_partial", MAX_ADMISSIONS * 3);
+}
+
+async function listPartialsAll() {
+  const [rows] = await getPool().execute(
+    "SELECT id, at, session_id, completion_percent, page, fields FROM admissions_partial ORDER BY at ASC, id ASC"
+  );
+  return rows.map(rowPartial);
+}
+
+async function listChatAll() {
+  const [rows] = await getPool().execute(
+    "SELECT id, at, session_id, role, body, read_by_admin FROM chat_messages ORDER BY at ASC, id ASC"
+  );
+  return rows.map(rowChat);
+}
+
+async function appendChat(row) {
+  const p = getPool();
+  await p.execute(
+    `INSERT INTO chat_messages (id, at, session_id, role, body, read_by_admin)
+     VALUES (?, ?, ?, ?, ?, ?)`,
+    [row.id, row.at, row.sessionId, row.role, row.body, row.readByAdmin ? 1 : 0]
+  );
+  await trimOldest("chat_messages", MAX_CHAT);
+}
+
+async function replaceChatAll(list) {
+  const p = getPool();
+  await p.execute("DELETE FROM chat_messages");
+  for (const m of list) {
+    await p.execute(
+      `INSERT INTO chat_messages (id, at, session_id, role, body, read_by_admin) VALUES (?, ?, ?, ?, ?, ?)`,
+      [m.id, m.at, m.sessionId, m.role, m.body, m.readByAdmin ? 1 : 0]
+    );
+  }
+}
+
+async function markChatVisitorRead(sessionId) {
+  await getPool().execute(
+    "UPDATE chat_messages SET read_by_admin = 1 WHERE session_id = ? AND role = 'visitor'",
+    [sessionId]
+  );
+}
+
+async function clearChat() {
+  await getPool().execute("DELETE FROM chat_messages");
+}
+
+async function maybeWipeChatOnStart() {
+  if (process.env.WIPE_CHAT_ON_RESTART === "1") {
+    await clearChat();
+    console.log("WIPE_CHAT_ON_RESTART=1: chat history cleared on startup.");
+  }
+}
+
+module.exports = {
+  readSite,
+  writeSite,
+  appendAnalytics,
+  listAnalyticsAll,
+  appendAdmission,
+  listAdmissionsAll,
+  appendPartial,
+  listPartialsAll,
+  listChatAll,
+  appendChat,
+  replaceChatAll,
+  markChatVisitorRead,
+  clearChat,
+  maybeWipeChatOnStart,
+  getPool,
+};
