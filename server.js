@@ -386,7 +386,8 @@ app.post("/api/chat", async (req, res) => {
     return res.json({ ok: true, id: row.id });
   } catch (err) {
     console.error("chat write", err);
-    return res.status(500).json({ error: "server" });
+    const msg = err && err.message ? String(err.message).slice(0, 240) : "server";
+    return res.status(500).json({ error: msg });
   }
 });
 

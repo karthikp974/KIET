@@ -112,15 +112,25 @@ function rowChat(r) {
   };
 }
 
+const TRIM_TABLES = new Set(["analytics_events", "admissions", "admissions_partial", "chat_messages"]);
+
+/**
+ * Remove oldest rows when count > max. Uses a numeric LIMIT in SQL (not a prepared ?)
+ * because MySQL often rejects LIMIT ? inside DELETE subqueries.
+ */
 async function trimOldest(table, max) {
+  if (!TRIM_TABLES.has(table)) {
+    console.error("trimOldest: unknown table", table);
+    return;
+  }
   const p = getPool();
-  const [c] = await p.execute(`SELECT COUNT(*) AS n FROM ${table}`);
-  const n = c[0].n;
+  const [c] = await p.execute(`SELECT COUNT(*) AS n FROM \`${table}\``);
+  const n = Number(c[0].n) || 0;
   const excess = n - max;
   if (excess <= 0) return;
-  await p.execute(
-    `DELETE FROM ${table} WHERE id IN (SELECT id FROM (SELECT id FROM ${table} ORDER BY at ASC, id ASC LIMIT ?) t)`,
-    [excess]
+  const lim = Math.min(Math.max(1, excess), 50000);
+  await p.query(
+    `DELETE FROM \`${table}\` WHERE id IN (SELECT id FROM (SELECT id FROM \`${table}\` ORDER BY at ASC, id ASC LIMIT ${lim}) t)`
   );
 }
 
