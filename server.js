@@ -8,7 +8,11 @@ const store = require("./db");
 
 const ROOT = __dirname;
 const PUBLIC = path.join(ROOT, "public");
-const UPLOADS = path.join(PUBLIC, "uploads");
+/** Persistent disk for uploads (set on Railway: mount a volume and set UPLOADS_DIR=/data/uploads). */
+const UPLOADS =
+  process.env.UPLOADS_DIR && String(process.env.UPLOADS_DIR).trim()
+    ? path.resolve(String(process.env.UPLOADS_DIR).trim())
+    : path.join(PUBLIC, "uploads");
 
 const PORT = Number(process.env.PORT) || 3750;
 const COOKIE_SECRET = process.env.COOKIE_SECRET || "change-this-in-production";
@@ -17,6 +21,41 @@ const ADMIN_PASSWORD_FULL = process.env.ADMIN_PASSWORD_FULL || "Adminkie";
 const ADMIN_PASSWORD_VISI = process.env.ADMIN_PASSWORD_VISI || "Adminvisi";
 
 fs.mkdirSync(UPLOADS, { recursive: true });
+
+/**
+ * Phone / DSLR photos → WebP (max ~2048px), EXIF rotation applied. Skips GIF (animation) and SVG.
+ * Returns absolute path to final file, or null to keep original upload.
+ */
+async function optimizeRasterUpload(absPath, mimetype) {
+  if (!mimetype || !String(mimetype).startsWith("image/")) return null;
+  if (mimetype === "image/gif" || mimetype === "image/svg+xml") return null;
+  let sharpLib;
+  try {
+    sharpLib = require("sharp");
+  } catch (e) {
+    console.warn("sharp not installed; skipping image optimization");
+    return null;
+  }
+  const ext = path.extname(absPath);
+  const dir = path.dirname(absPath);
+  const stem = path.basename(absPath, ext);
+  const outPath = path.join(dir, stem + ".webp");
+  const tmpPath = path.join(dir, stem + ".opt-" + Date.now() + ".webp");
+  try {
+    await sharpLib(absPath)
+      .rotate()
+      .resize(2048, 2048, { fit: "inside", withoutEnlargement: true })
+      .webp({ quality: 82, effort: 4 })
+      .toFile(tmpPath);
+    await fs.promises.unlink(absPath).catch(() => {});
+    await fs.promises.rename(tmpPath, outPath);
+    return outPath;
+  } catch (e) {
+    console.error("optimizeRasterUpload", e && e.message ? e.message : e);
+    await fs.promises.unlink(tmpPath).catch(() => {});
+    return null;
+  }
+}
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -293,10 +332,17 @@ app.put("/api/site", requireFullAdmin, async (req, res) => {
   }
 });
 
-app.post("/api/upload", requireFullAdmin, upload.single("file"), (req, res) => {
+app.post("/api/upload", requireFullAdmin, upload.single("file"), async (req, res) => {
   if (!req.file) return res.status(400).json({ error: "No file" });
-  const url = "/uploads/" + req.file.filename;
-  res.json({ ok: true, url, filename: req.file.filename });
+  let filename = req.file.filename;
+  try {
+    const optimized = await optimizeRasterUpload(req.file.path, req.file.mimetype);
+    if (optimized) filename = path.basename(optimized);
+  } catch (e) {
+    console.error("upload optimize", e);
+  }
+  const url = "/uploads/" + filename;
+  res.json({ ok: true, url, filename });
 });
 
 app.post("/api/analytics", async (req, res) => {
@@ -603,6 +649,17 @@ app.post("/api/admin/chat/clear", requireFullAdmin, async (req, res) => {
   }
 });
 
+const uploadsCache =
+  process.env.UPLOADS_CACHE_OFF === "1" ? 0 : process.env.NODE_ENV === "production" ? 31536000000 : 86400000;
+app.use(
+  "/uploads",
+  express.static(UPLOADS, {
+    maxAge: uploadsCache,
+    immutable: true,
+    etag: true,
+    lastModified: true,
+  })
+);
 app.use(express.static(PUBLIC));
 app.use("/admin", express.static(path.join(ROOT, "admin")));
 

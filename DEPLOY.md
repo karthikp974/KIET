@@ -45,7 +45,8 @@ You do **not** need to write SQL by hand. Tables are created when you run **one 
 
 - **Start command**: `npm start` (already in `package.json`).
 - Railway sets `PORT` automatically; the server uses it.
-- Uploaded images are stored on the service disk under `public/uploads/`. For heavy production use, consider **Railway Volume** or cloud storage later.
+- **Uploads (photos from admin):** The API saves files under `public/uploads/` by default, but that disk is **wiped on redeploy**. For production, add a **Volume** in Railway, mount it (e.g. to `/data/uploads`), and set **`UPLOADS_DIR=/data/uploads`** on the web service so uploads persist. Images are auto-optimized to **WebP** for faster loads.
+- Optional: **`UPLOADS_CACHE_OFF=1`** disables long browser cache while debugging uploads.
 
 ## 3) Vercel: Frontend
 

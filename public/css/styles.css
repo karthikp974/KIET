@@ -1722,6 +1722,8 @@ button.fab-opt {
   height: 100%;
   object-fit: cover;
   display: block;
+  content-visibility: auto;
+  contain-intrinsic-size: 240px 160px;
 }
 
 .spot-card-img,

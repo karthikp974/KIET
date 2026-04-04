@@ -34,7 +34,13 @@
   function cardImgHtml(url, wrapClass) {
     var u = String(url || "").trim();
     if (!u) return '<div class="' + wrapClass + ' ph-empty"></div>';
-    return '<div class="' + wrapClass + '"><img src="' + esc(u) + '" alt="" loading="lazy" /></div>';
+    return (
+      '<div class="' +
+      wrapClass +
+      '"><img src="' +
+      esc(u) +
+      '" alt="" loading="lazy" decoding="async" fetchpriority="low" /></div>'
+    );
   }
 
   function track(type, section, payload) {
@@ -53,7 +59,7 @@
   function mediaHtml(url) {
     if (!url) return "";
     if (isVideoUrl(url)) return "<video controls playsinline src=\"" + esc(url) + "\"></video>";
-    return "<img src=\"" + esc(url) + "\" alt=\"\" />";
+    return "<img src=\"" + esc(url) + "\" alt=\"\" loading=\"lazy\" decoding=\"async\" />";
   }
 
   function closeApply() {
@@ -404,7 +410,7 @@
     root.innerHTML = "";
     asArray(SITE.visionaries).forEach(function (v) {
       var inner = v.image && String(v.image).trim()
-        ? '<div class="v-card-img"><img src="' + esc(v.image) + '" alt="" loading="lazy" /></div>'
+        ? '<div class="v-card-img"><img src="' + esc(v.image) + '" alt="" loading="lazy" decoding="async" fetchpriority="low" /></div>'
         : '<div class="v-card-img ph-empty"></div>';
       root.insertAdjacentHTML(
         "beforeend",
@@ -984,6 +990,15 @@
     loadPixels(SITE.pixels || {});
 
     var hero = SITE.hero || {};
+    var heroImgPre = hero.image ? String(hero.image).trim() : "";
+    if (heroImgPre && !document.querySelector("link[data-kiet-preload-hero]")) {
+      var pl = document.createElement("link");
+      pl.rel = "preload";
+      pl.as = "image";
+      pl.href = heroImgPre;
+      pl.setAttribute("data-kiet-preload-hero", "1");
+      document.head.appendChild(pl);
+    }
     $("hero-bg").style.backgroundImage = cssBgUrl(hero.image);
     applyHeroPackageLine($("hero-package"), hero.packageLine || "");
     $("hero-lbl-left").textContent = hero.statLeftLabel || "Students";
