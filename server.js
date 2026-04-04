@@ -247,9 +247,28 @@ app.get("/api/me", (req, res) => {
   res.json({ ok: !!role, role: role || null });
 });
 
+/** Avoid blank public pages when site JSON lists are stored as wrong type (e.g. programStreams as {}). */
+function sanitizeSiteForClient(data) {
+  if (!data || typeof data !== "object" || Array.isArray(data)) return data;
+  const listKeys = [
+    "programStreams",
+    "campusSpotlight",
+    "placements",
+    "industryMOU",
+    "visionaries",
+    "clubs",
+    "difference",
+  ];
+  const o = { ...data };
+  for (const k of listKeys) {
+    if (o[k] != null && !Array.isArray(o[k])) o[k] = [];
+  }
+  return o;
+}
+
 app.get("/api/site", async (req, res) => {
   try {
-    res.json(await store.readSite());
+    res.json(sanitizeSiteForClient(await store.readSite()));
   } catch (e) {
     console.error(e);
     res.status(500).json({ error: "server" });
@@ -261,6 +280,9 @@ app.put("/api/site", requireFullAdmin, async (req, res) => {
     const body = req.body;
     if (body == null || typeof body !== "object" || Array.isArray(body)) {
       return res.status(400).json({ error: "Invalid body: need a JSON object" });
+    }
+    if (body.programStreams != null && !Array.isArray(body.programStreams)) {
+      return res.status(400).json({ error: "programStreams must be a JSON array [...]" });
     }
     await store.writeSite(body);
     res.json({ ok: true });

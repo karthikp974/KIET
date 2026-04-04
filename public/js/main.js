@@ -21,6 +21,11 @@
     return d.innerHTML;
   }
 
+  /** Site JSON from DB mistakes (e.g. programStreams as object) must not crash the whole page. */
+  function asArray(v) {
+    return Array.isArray(v) ? v : [];
+  }
+
   function cssBgUrl(u) {
     var s = String(u || "").trim();
     return s ? "url(" + JSON.stringify(s) + ")" : "none";
@@ -265,7 +270,7 @@
   function renderSpotlight() {
     var root = $("spotlight-list");
     root.innerHTML = "";
-    (SITE.campusSpotlight || []).forEach(function (ev) {
+    asArray(SITE.campusSpotlight).forEach(function (ev) {
       var id = esc(ev.id || "");
       var a = document.createElement("a");
       a.className = "spot-card";
@@ -287,7 +292,7 @@
   function renderPlacements() {
     var root = $("placements-list");
     root.innerHTML = "";
-    var items = SITE.placements || [];
+    var items = asArray(SITE.placements);
     function cardHtml(p) {
       return (
         '<div class="p-card-marquee"><div class="p-card-side"><h3>' +
@@ -321,7 +326,7 @@
     grid.classList.add("branch-grid-hidden");
     streamSelected = false;
     currentStream = null;
-    (SITE.programStreams || []).forEach(function (st) {
+    asArray(SITE.programStreams).forEach(function (st) {
       var b = document.createElement("button");
       b.type = "button";
       b.className = "stream-btn";
@@ -345,7 +350,7 @@
   function renderBranches(st) {
     var grid = $("branch-grid");
     grid.innerHTML = "";
-    (st.branches || []).forEach(function (br) {
+    asArray(st.branches).forEach(function (br) {
       var card = document.createElement("div");
       card.className = "branch-card";
       card.innerHTML =
@@ -380,7 +385,7 @@
     var wrap = $("mou-rows");
     if (!wrap) return;
     wrap.innerHTML = "";
-    var list = SITE.industryMOU || [];
+    var list = asArray(SITE.industryMOU);
     if (!list.length) return;
     var names = list.map(function (c) {
       return '<span class="mou-ticker-name">' + esc(c.name) + "</span>";
@@ -397,7 +402,7 @@
   function renderVision() {
     var root = $("vision-grid");
     root.innerHTML = "";
-    (SITE.visionaries || []).forEach(function (v) {
+    asArray(SITE.visionaries).forEach(function (v) {
       var inner = v.image && String(v.image).trim()
         ? '<div class="v-card-img"><img src="' + esc(v.image) + '" alt="" loading="lazy" /></div>'
         : '<div class="v-card-img ph-empty"></div>';
@@ -418,7 +423,7 @@
     var root = $(containerId);
     if (!root) return;
     root.innerHTML = "";
-    (SITE.clubs || []).forEach(function (c) {
+    asArray(SITE.clubs).forEach(function (c) {
       var insta =
         c.instagram && c.instagram.length
           ? '<a class="insta-link" href="' +
@@ -447,7 +452,7 @@
     $("diff-sub").textContent = SITE.differenceSubtitle || "";
     var root = $("timeline-items");
     root.innerHTML = "";
-    (SITE.difference || []).forEach(function (d) {
+    asArray(SITE.difference).forEach(function (d) {
       var wrap = document.createElement("div");
       wrap.className = "tl-item";
       var a = document.createElement("a");
@@ -495,13 +500,13 @@
     var stSel = $("adm-stream");
     var brSel = $("adm-branch");
     stSel.innerHTML = '<option value="">Select stream</option>';
-    (SITE.programStreams || []).forEach(function (s) {
+    asArray(SITE.programStreams).forEach(function (s) {
       stSel.insertAdjacentHTML("beforeend", '<option value="' + esc(s.id) + '">' + esc(s.name) + "</option>");
     });
     function refillBranches() {
       var id = stSel.value;
       brSel.innerHTML = '<option value="">Select branch</option>';
-      var st = (SITE.programStreams || []).find(function (x) {
+      var st = asArray(SITE.programStreams).find(function (x) {
         return x.id === id;
       });
       if (!st) return;
@@ -634,7 +639,7 @@
     var id = decodeURIComponent(rawId || "");
     var root = $("detail-root");
     if (kind === "spotlight") {
-      var ev = (SITE.campusSpotlight || []).find(function (x) {
+      var ev = asArray(SITE.campusSpotlight).find(function (x) {
         return String(x.id) === id;
       });
       if (!ev) {
@@ -655,7 +660,7 @@
       return;
     }
     if (kind === "difference") {
-      var d = (SITE.difference || []).find(function (x) {
+      var d = asArray(SITE.difference).find(function (x) {
         return String(x.id) === id;
       });
       if (!d) {

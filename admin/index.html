@@ -29,6 +29,11 @@
       </div>
 
       <div id="main-panel" class="hidden">
+        <p id="role-banner" class="admin-role-banner hidden" role="status">
+          You signed in with the <strong>view-only</strong> password. Tabs for editing the homepage, programs, and
+          <strong>Save website</strong> stay hidden. Use your <strong>full admin</strong> password to upload images, add
+          rows, and save changes.
+        </p>
         <nav class="admin-tabs" id="main-tabs">
           <button type="button" data-tab="t-home" class="on tab-full">Homepage content</button>
           <button type="button" data-tab="t-pages" class="tab-full">About · Admissions · Contact</button>
@@ -38,6 +43,11 @@
         </nav>
 
         <section class="tab-panel on" id="t-home">
+          <p class="hint admin-upload-hint">
+            <strong>Images on Railway / cloud:</strong> files saved under <code>/uploads/</code> on the server can
+            <em>disappear when the app redeploys</em>. For images that must always work, use a full
+            <code>https://…</code> URL, or add a persistent volume mounted at <code>public/uploads</code> on your host.
+          </p>
           <details class="page-acc" open>
             <summary>Hero &amp; branding</summary>
             <div class="page-acc-body">
@@ -171,7 +181,16 @@
 
         <section class="tab-panel" id="t-pro">
           <h2>Program streams &amp; branches</h2>
-          <p class="hint">Edit carefully. Each stream has <code>id</code>, <code>name</code>, and <code>branches</code> with <code>name</code>, <code>blurb</code>, <code>duration</code>, <code>image</code> (URL or /uploads/…).</p>
+          <p class="hint">
+            Programs are edited as JSON (there is no separate “+ Add stream” form). The JSON must be a single
+            <strong>array</strong> <code>[ … ]</code> of streams. Each stream has <code>id</code>, <code>name</code>, and
+            <code>branches</code> (array) with <code>name</code>, <code>blurb</code>, <code>duration</code>,
+            <code>image</code> (URL or <code>/uploads/…</code>).
+          </p>
+          <div class="prog-json-actions">
+            <button type="button" class="btn ghost" id="btn-prog-sample">Insert sample stream</button>
+            <button type="button" class="btn ghost" id="btn-prog-validate">Check JSON</button>
+          </div>
           <textarea id="programs-json" rows="28" class="code"></textarea>
         </section>
 

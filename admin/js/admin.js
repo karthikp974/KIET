@@ -78,6 +78,8 @@
     $("btn-save-all").classList.toggle("hidden", !full);
     var clr = $("btn-clear-chat");
     if (clr) clr.classList.toggle("hidden", !full);
+    var rb = $("role-banner");
+    if (rb) rb.classList.toggle("hidden", full);
     if (!full) {
       document.querySelectorAll(".tab-panel").forEach(function (p) {
         p.classList.remove("on");
@@ -131,7 +133,7 @@
 
   function campusBlock(ev) {
     var uid = "ci-" + Math.random().toString(36).slice(2);
-    return block(
+    var w = block(
       "<h3>Campus event</h3>" +
         '<label>Title<input type="text" class="c-title" value="' +
         escAttr(ev.title) +
@@ -154,6 +156,8 @@
         "</textarea></label>",
       null
     );
+    if (ev.id) w.setAttribute("data-item-id", ev.id);
+    return w;
   }
 
   function placeBlock(p) {
@@ -186,6 +190,7 @@
         '" /></label>',
       null
     );
+    if (p.id) w.setAttribute("data-item-id", p.id);
     wirePlaceBlock(w);
     return w;
   }
@@ -210,7 +215,7 @@
 
   function visBlock(v) {
     var uid = "v-" + Math.random().toString(36).slice(2);
-    return block(
+    var w = block(
       "<h3>Visionary</h3>" +
         '<label>Name<input type="text" class="v-n" value="' +
         escAttr(v.name) +
@@ -227,11 +232,13 @@
         '" /></div>',
       null
     );
+    if (v.id) w.setAttribute("data-item-id", v.id);
+    return w;
   }
 
   function clubBlock(c) {
     var uid = "cl-" + Math.random().toString(36).slice(2);
-    return block(
+    var w = block(
       "<h3>Club</h3>" +
         '<label>Title<input type="text" class="cl-t" value="' +
         escAttr(c.title) +
@@ -254,10 +261,12 @@
         '" /></div>',
       null
     );
+    if (c.id) w.setAttribute("data-item-id", c.id);
+    return w;
   }
 
   function diffBlock(d) {
-    return block(
+    var w = block(
       "<h3>Difference item</h3>" +
         '<label>Title (e.g. KIOT)<input type="text" class="d-t" value="' +
         escAttr(d.title) +
@@ -273,6 +282,17 @@
         "</textarea></label>",
       null
     );
+    if (d.id) w.setAttribute("data-item-id", d.id);
+    return w;
+  }
+
+  function stableId(w, prefix) {
+    var id = (w.getAttribute("data-item-id") || "").trim();
+    if (!id) {
+      id = prefix + Math.random().toString(36).slice(2);
+      w.setAttribute("data-item-id", id);
+    }
+    return id;
   }
 
   function escAttr(s) {
@@ -292,7 +312,7 @@
     var out = [];
     $("campus-box").querySelectorAll(".block").forEach(function (w) {
       out.push({
-        id: "c-" + Math.random().toString(36).slice(2),
+        id: stableId(w, "c-"),
         title: w.querySelector(".c-title").value.trim(),
         summary: w.querySelector(".c-sum").value.trim(),
         image: w.querySelector(".c-img").value.trim(),
@@ -344,7 +364,7 @@
     data.placements = readList("#place-box .block", function (w) {
       var imgEl = w.querySelector(".p-img");
       return {
-        id: "p-" + Math.random().toString(36).slice(2),
+        id: stableId(w, "p-"),
         studentName: w.querySelector(".p-n").value.trim(),
         branch: w.querySelector(".p-b").value.trim(),
         company: w.querySelector(".p-c").value.trim(),
@@ -361,7 +381,7 @@
     });
     data.visionaries = readList("#vis-box .block", function (w) {
       return {
-        id: "v-" + Math.random().toString(36).slice(2),
+        id: stableId(w, "v-"),
         name: w.querySelector(".v-n").value.trim(),
         role: w.querySelector(".v-r").value.trim(),
         image: w.querySelector(".v-img").value.trim(),
@@ -369,7 +389,7 @@
     });
     data.clubs = readList("#club-box .block", function (w) {
       return {
-        id: "cl-" + Math.random().toString(36).slice(2),
+        id: stableId(w, "cl-"),
         title: w.querySelector(".cl-t").value.trim(),
         subtitle: w.querySelector(".cl-s").value.trim(),
         blurb: w.querySelector(".cl-b").value.trim(),
@@ -381,7 +401,7 @@
     data.differenceSubtitle = $("diff-sub").value.trim();
     data.difference = readList("#diff-box .block", function (w) {
       return {
-        id: "d-" + Math.random().toString(36).slice(2),
+        id: stableId(w, "d-"),
         title: w.querySelector(".d-t").value.trim(),
         teaser: w.querySelector(".d-te").value.trim(),
         body: w.querySelector(".d-b").value.trim(),
@@ -408,9 +428,18 @@
       youtubeUrl: $("c-yt").value.trim(),
     };
     try {
-      data.programStreams = JSON.parse($("programs-json").value);
+      var parsed = JSON.parse($("programs-json").value);
+      if (!Array.isArray(parsed)) {
+        alert(
+          "Programs JSON must be an array of streams, like [ { \"id\": \"btech\", \"name\": \"B.Tech\", \"branches\": [] } ], not a single { } object."
+        );
+        throw new Error("programStreams not array");
+      }
+      data.programStreams = parsed;
     } catch (e) {
-      alert("Programs JSON is invalid — fix syntax or undo.");
+      if (e.message !== "programStreams not array") {
+        alert("Programs JSON is invalid — fix syntax or undo.");
+      }
       throw e;
     }
   }
@@ -449,7 +478,8 @@
     $("c-web").value = cp.website || "";
     $("c-insta").value = cp.instagramUrl || "";
     $("c-yt").value = cp.youtubeUrl || "";
-    $("programs-json").value = JSON.stringify(data.programStreams || [], null, 2);
+    if (!Array.isArray(data.programStreams)) data.programStreams = [];
+    $("programs-json").value = JSON.stringify(data.programStreams, null, 2);
 
     $("campus-box").innerHTML = "";
     (data.campusSpotlight || []).forEach(function (x) {
@@ -937,9 +967,60 @@
     save().catch(function () {});
   });
 
+  var btnProgSample = $("btn-prog-sample");
+  if (btnProgSample) {
+    btnProgSample.addEventListener("click", function () {
+      if (adminRole !== "full") {
+        alert("Full admin sign-in required.");
+        return;
+      }
+      var ta = $("programs-json");
+      if (!ta) return;
+      var cur;
+      try {
+        cur = JSON.parse(ta.value);
+      } catch (e) {
+        alert("Fix JSON syntax first, or clear the box and paste a valid [ ] array.");
+        return;
+      }
+      if (!Array.isArray(cur)) cur = [];
+      var sid = "stream-" + Math.random().toString(36).slice(2, 9);
+      var bid = "br-" + Math.random().toString(36).slice(2, 9);
+      cur.push({
+        id: sid,
+        name: "New stream (rename me)",
+        branches: [
+          {
+            id: bid,
+            name: "Sample branch",
+            blurb: "Short description for students.",
+            duration: "4 Years",
+            image: "",
+          },
+        ],
+      });
+      ta.value = JSON.stringify(cur, null, 2);
+    });
+  }
+  var btnProgVal = $("btn-prog-validate");
+  if (btnProgVal) {
+    btnProgVal.addEventListener("click", function () {
+      try {
+        var p = JSON.parse($("programs-json").value);
+        if (!Array.isArray(p)) {
+          alert('Programs must be a JSON array starting with [ and ending with ], not a single { "stream": … } object.');
+          return;
+        }
+        alert("JSON is valid: " + p.length + " stream(s). Click Save website to publish.");
+      } catch (e) {
+        alert("Invalid JSON: " + (e && e.message ? e.message : e));
+      }
+    });
+  }
+
   $("add-campus").addEventListener("click", function () {
     $("campus-box").appendChild(
-      campusBlock({ id: "n", title: "", summary: "", image: "", body: "", gallery: [] })
+      campusBlock({ title: "", summary: "", image: "", body: "", gallery: [] })
     );
   });
   $("add-place").addEventListener("click", function () {
