@@ -19,7 +19,7 @@
     <link rel="stylesheet" href="/css/styles.css" />
   </head>
   <body>
-    <a class="skip" href="#route-home">Skip to content</a>
+    <a class="skip" href="#spotlight">Skip to content</a>
 
     <div id="app">
       <section class="hero-full" id="top">
@@ -54,9 +54,19 @@
       </section>
 
       <div class="dual-nav" id="dual-nav">
-        <div class="dual-nav-row dual-nav-sections-wrap section-marquee-bar" id="nav-marquee-row" data-show-home-only>
-          <div class="marquee marquee-section marquee-tilt-wrap" id="section-marquee-wrap" aria-label="Sections on this page">
-            <div class="marquee-track section-nav-track" id="section-marquee"></div>
+        <div
+          class="dual-nav-row dual-nav-sections-wrap section-marquee-bar nav-marquee-row"
+          id="nav-marquee-row"
+          data-show-home-only
+        >
+          <div class="section-nav-carousel" id="section-nav-carousel">
+            <button type="button" class="sec-nav-btn sec-prev" id="section-marquee-prev" aria-label="Sections left">‹</button>
+            <div class="section-marquee-viewport">
+              <div class="marquee marquee-section" id="section-marquee-wrap" aria-label="Sections on this page">
+                <div class="marquee-track section-nav-marquee-strip" id="section-marquee"></div>
+              </div>
+            </div>
+            <button type="button" class="sec-nav-btn sec-next" id="section-marquee-next" aria-label="Sections right">›</button>
           </div>
         </div>
         <div class="dual-nav-row dual-nav-pages nav-pages-bar thin-nav-row">
@@ -72,7 +82,7 @@
       </div>
 
       <div id="route-home" class="route route-home route-pad-top">
-        <section class="section" id="spotlight">
+        <section class="section" id="spotlight" tabindex="-1">
           <h2 class="h-section">Campus spotlight</h2>
           <p class="lead lead-tight">Open a story on its own page.</p>
           <div class="spotlight-list spotlight-compact" id="spotlight-list"></div>

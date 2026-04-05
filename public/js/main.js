@@ -1,4 +1,10 @@
 (function () {
+  try {
+    if ("scrollRestoration" in history) history.scrollRestoration = "manual";
+  } catch (e) {
+    /* ignore */
+  }
+
   var SITE = null;
   var sessionId =
     localStorage.getItem("kiet_sid") ||
@@ -35,7 +41,12 @@
   function normalizeMediaUrl(u) {
     var s = String(u || "").trim();
     if (!s) return s;
-    if (/^\/uploads\/f-\d+$/i.test(s)) return s + ".jpg";
+    var q = s.indexOf("?");
+    var base = q >= 0 ? s.slice(0, q) : s;
+    var rest = q >= 0 ? s.slice(q) : "";
+    if (/^\/uploads\/f-[0-9]+$/i.test(base) && !/\.[a-z0-9]{2,4}$/i.test(base)) {
+      return base + ".jpg" + rest;
+    }
     return s;
   }
 
@@ -137,7 +148,67 @@
         nudge(280);
       };
     }
+  }
 
+  var secRafId = null;
+
+  function stopSectionNavMarquee() {
+    if (secRafId != null) {
+      cancelAnimationFrame(secRafId);
+      secRafId = null;
+    }
+    var st = $("section-marquee");
+    if (st) st.style.transform = "";
+  }
+
+  function wireSectionNavStrip() {
+    stopSectionNavMarquee();
+    var track = $("section-marquee");
+    var prev = $("section-marquee-prev");
+    var next = $("section-marquee-next");
+    if (!track || !track.innerHTML.trim()) return;
+
+    var offset = 0;
+    var speed = 0.22;
+    var pauseUntil = 0;
+
+    function halfW() {
+      return Math.max(1, track.scrollWidth / 2);
+    }
+
+    function tick() {
+      if (Date.now() > pauseUntil) {
+        offset += speed;
+        var h = halfW();
+        if (offset >= h) offset = 0;
+      }
+      track.style.transform = "translateX(" + -offset + "px)";
+      secRafId = requestAnimationFrame(tick);
+    }
+
+    if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      secRafId = requestAnimationFrame(tick);
+    }
+
+    function nudge(dx) {
+      pauseUntil = Date.now() + 4000;
+      var h = halfW();
+      offset += dx;
+      while (offset < 0) offset += h;
+      while (offset >= h) offset -= h;
+      track.style.transform = "translateX(" + -offset + "px)";
+    }
+
+    if (prev) {
+      prev.onclick = function () {
+        nudge(-200);
+      };
+    }
+    if (next) {
+      next.onclick = function () {
+        nudge(200);
+      };
+    }
   }
 
   function track(type, section, payload) {
@@ -299,24 +370,27 @@
         return '<a href="#/" data-sec="' + p.id + '">' + esc(p.lab) + "</a>";
       })
       .join("");
-    el.innerHTML = inner;
-    el.onclick = function (e) {
-      var a = e.target.closest("a[data-sec]");
-      if (!a) return;
-      e.preventDefault();
-      a.classList.remove("rgb-link");
-      void a.offsetWidth;
-      a.classList.add("rgb-link");
-      setTimeout(function () {
+    el.innerHTML = inner + inner;
+    var wrap = $("section-marquee-wrap");
+    if (wrap) {
+      wrap.onclick = function (e) {
+        var a = e.target.closest("a[data-sec]");
+        if (!a) return;
+        e.preventDefault();
         a.classList.remove("rgb-link");
-      }, 2200);
-      location.hash = "#/";
-      var id = a.getAttribute("data-sec");
-      setTimeout(function () {
-        var t = document.getElementById(id);
-        if (t) t.scrollIntoView({ behavior: "smooth" });
-      }, 150);
-    };
+        void a.offsetWidth;
+        a.classList.add("rgb-link");
+        setTimeout(function () {
+          a.classList.remove("rgb-link");
+        }, 2200);
+        location.hash = "#/";
+        var id = a.getAttribute("data-sec");
+        setTimeout(function () {
+          var t = document.getElementById(id);
+          if (t) t.scrollIntoView({ behavior: "smooth" });
+        }, 150);
+      };
+    }
   }
 
   function wireNavRgb() {
@@ -336,20 +410,6 @@
     });
   }
 
-  function setupMarqueeScrollHide() {
-    var hero = $("top");
-    var row = $("nav-marquee-row");
-    if (!hero || !row) return;
-    function tick() {
-      var h = hero.getBoundingClientRect().height || hero.offsetHeight || 0;
-      var y = window.scrollY || document.documentElement.scrollTop;
-      row.classList.toggle("marquee-scrolled-out", y > Math.max(80, h * 0.15));
-    }
-    window.addEventListener("scroll", tick, { passive: true });
-    window.addEventListener("resize", tick, { passive: true });
-    tick();
-  }
-
   function renderSpotlight() {
     var root = $("spotlight-list");
     root.innerHTML = "";
@@ -358,9 +418,9 @@
       var a = document.createElement("a");
       a.className = "spot-card";
       a.href = "#/spotlight/" + encodeURIComponent(ev.id || "");
-      var aboveFold = idx < 3;
+      var firstCard = idx === 0;
       a.innerHTML =
-        cardImgHtml(ev.image, "spot-card-img", { lazy: !aboveFold, priority: aboveFold }) +
+        cardImgHtml(ev.image, "spot-card-img", { lazy: !firstCard, priority: firstCard }) +
         '<div class="spot-card-body"><h3>' +
         esc(ev.title) +
         "</h3><p>" +
@@ -808,6 +868,7 @@
     });
     var secRow = document.querySelector(".dual-nav-sections-wrap");
     if (name === "detail") {
+      stopSectionNavMarquee();
       $("route-detail").classList.remove("hidden");
       if (secRow) secRow.classList.add("hidden");
       renderDetail(sub, subId);
@@ -821,6 +882,12 @@
     if (secRow) secRow.classList.toggle("hidden", name !== "home");
     updateNavForPage(name);
     track("route", name, {});
+    if (name === "home") {
+      window.scrollTo(0, 0);
+      wireSectionNavStrip();
+    } else {
+      stopSectionNavMarquee();
+    }
   }
 
   function onHash() {
@@ -841,10 +908,23 @@
 
   function wireNav() {
     window.addEventListener("hashchange", onHash);
+    window.addEventListener("pageshow", function (ev) {
+      if (ev.persisted) {
+        var h = (location.hash || "#/").replace(/^#\/?/, "");
+        var p = h.split("/").filter(Boolean)[0] || "home";
+        if (p === "home") window.scrollTo(0, 0);
+      }
+    });
     $("detail-back").addEventListener("click", function () {
       history.back();
     });
     onHash();
+    requestAnimationFrame(function () {
+      var h = (location.hash || "#/").replace(/^#\/?/, "");
+      var parts = h.split("/").filter(Boolean);
+      var p = parts[0] || "home";
+      if (p === "home" && !parts[1]) window.scrollTo(0, 0);
+    });
   }
 
   function wireModals() {
@@ -1160,7 +1240,6 @@
 
     renderMarquee();
     wireNavRgb();
-    setupMarqueeScrollHide();
     renderSpotlight();
     renderPlacements();
     renderPrograms();
