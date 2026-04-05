@@ -340,14 +340,14 @@
   function renderMarquee() {
     var el = $("section-marquee");
     if (!el) return;
-    var parts = [
-      { id: "spotlight", lab: "Spotlight" },
+    var parts = [{ id: "spotlight", lab: "Spotlight" }];
+    if (asArray(SITE.clubs).length) parts.push({ id: "clubs", lab: "Clubs" });
+    parts.push(
       { id: "placements", lab: "Placements" },
       { id: "programs", lab: "Programs" },
       { id: "mou", lab: "Industry MOU" },
-    ];
-    if (asArray(SITE.clubs).length) parts.push({ id: "clubs", lab: "Clubs" });
-    parts.push({ id: "vision", lab: "Visionaries" });
+      { id: "vision", lab: "Visionaries" }
+    );
     var inner = parts
       .map(function (p) {
         return '<a href="#/" data-sec="' + p.id + '">' + esc(p.lab) + "</a>";
@@ -1150,7 +1150,7 @@
       },
       { threshold: 0.2 }
     );
-    ["spotlight", "placements", "programs", "mou", "clubs", "vision", "difference"].forEach(function (id) {
+    ["spotlight", "clubs", "placements", "programs", "mou", "vision", "difference"].forEach(function (id) {
       var el = document.getElementById(id);
       if (el) {
         el.setAttribute("data-track", id);
