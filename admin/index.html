@@ -44,8 +44,9 @@
 
         <section class="tab-panel on" id="t-home">
           <p class="hint admin-upload-hint">
-            <strong>Uploads from PC or phone:</strong> choose a file in admin — the server saves it, compresses photos to
-            <strong>JPEG</strong> (max ~2048px, correct <code>.jpg</code> URL), and fills the field for you.
+            <strong>Uploads from PC or phone:</strong> choose a file in admin — the server saves it, converts photos to
+            <strong>JPEG</strong> and compresses toward about <strong>100KB</strong> (resize + quality) for faster pages,
+            with a correct <code>.jpg</code> URL.
             <strong>Railway:</strong> set env <code>UPLOADS_DIR</code> to a folder on a
             <strong>persistent volume</strong> (e.g. <code>/data/uploads</code>) so files survive redeploys. Otherwise
             use full <code>https://…</code> image links for anything you cannot afford to lose.
@@ -87,7 +88,7 @@
           <details class="page-acc">
             <summary>Placements</summary>
             <div class="page-acc-body">
-              <p class="hint">Photo preview is static; on the site it scrolls in the marquee below the text.</p>
+              <p class="hint">Photo preview is static; on the site cards sit in a row with a gentle tilt animation.</p>
               <div id="place-box"></div>
               <button type="button" class="btn ghost" id="add-place">+ Row</button>
             </div>

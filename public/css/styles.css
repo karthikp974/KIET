@@ -390,10 +390,8 @@ body {
   touch-action: pan-y;
 }
 
-.marquee-tilt-wrap,
-.mou-marquee-tilt {
+.marquee-tilt-wrap {
   transform-style: preserve-3d;
-  transition: transform 0.1s ease-out;
 }
 
 .fade-edges::before,
@@ -415,20 +413,37 @@ body {
   background: linear-gradient(-90deg, #000, transparent);
 }
 
-.marquee-pingpong {
-  display: flex;
-  gap: 2.5rem;
-  width: max-content;
-  padding: 0.2rem 0;
-  animation: marquee-pingpong 90s ease-in-out infinite alternate;
+/* Gentle rotate sway (replaces horizontal scroll marquee) */
+@keyframes kiet-rotate-sway {
+  0%,
+  100% {
+    transform: rotate(-2.75deg);
+  }
+  50% {
+    transform: rotate(2.75deg);
+  }
 }
 
-@keyframes marquee-pingpong {
-  0% {
-    transform: translateX(0);
-  }
-  100% {
-    transform: translateX(calc(-50% + 50vw));
+.kiet-rotate-sway {
+  animation: kiet-rotate-sway 16s ease-in-out infinite;
+  transform-origin: 50% 50%;
+}
+
+.section-nav-track.kiet-rotate-sway {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 0.65rem 1.75rem;
+  width: 100%;
+  max-width: 100%;
+  padding: 0.2rem 0;
+  animation-duration: 15s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kiet-rotate-sway {
+    animation: none !important;
   }
 }
 
@@ -699,19 +714,17 @@ body {
 
 .placements-marquee-track {
   display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: stretch;
   gap: 1rem;
-  width: max-content;
+  width: 100%;
+  max-width: 100%;
   padding: 0.5rem 0;
-  animation: place-marquee 22s linear infinite;
 }
 
-@keyframes place-marquee {
-  0% {
-    transform: translateX(0);
-  }
-  100% {
-    transform: translateX(-50%);
-  }
+.placements-marquee-track.kiet-rotate-sway {
+  animation-duration: 18s;
 }
 
 .placements-marquee-wrap:hover .placements-marquee-track {
@@ -915,7 +928,7 @@ body {
   cursor: not-allowed;
 }
 
-/* MOU — partner logos (no outer box), marquee + pointer tilt on .mou-marquee-tilt */
+/* MOU — partner logos (rotate sway, no scroll marquee) */
 .mou-partners-root {
   margin: 0;
   padding: 0;
@@ -930,25 +943,21 @@ body {
 
 .mou-partners-track {
   display: flex;
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
+  justify-content: center;
   align-items: flex-end;
   gap: clamp(1.25rem, 4vw, 2.75rem);
-  width: max-content;
+  width: 100%;
+  max-width: 100%;
   padding: 0.25rem 0;
-  animation: mou-partners-marquee 48s linear infinite;
 }
 
 .mou-partners-marquee:hover .mou-partners-track {
   animation-play-state: paused;
 }
 
-@keyframes mou-partners-marquee {
-  0% {
-    transform: translateX(0);
-  }
-  100% {
-    transform: translateX(-50%);
-  }
+.mou-partners-track.kiet-rotate-sway {
+  animation-duration: 21s;
 }
 
 .mou-partner-cell {
@@ -1156,14 +1165,6 @@ body {
 
 .insta-link:hover {
   filter: brightness(1.08);
-}
-
-.marquee-clubs-slow {
-  animation: place-marquee 70s linear infinite;
-}
-
-.clubs-marquee {
-  margin-bottom: 1.1rem;
 }
 
 /* Timeline */
@@ -1865,9 +1866,4 @@ button.fab-opt {
 
 .p-card-side {
   order: 1;
-}
-
-
-.placements-marquee-track {
-  animation-duration: 22s;
 }

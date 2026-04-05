@@ -22,11 +22,12 @@ const ADMIN_PASSWORD_VISI = process.env.ADMIN_PASSWORD_VISI || "Adminvisi";
 
 fs.mkdirSync(UPLOADS, { recursive: true });
 
+const UPLOAD_TARGET_BYTES = 100 * 1024;
+
 /**
- * Phone / DSLR photos → JPEG (max ~2048px, mozjpeg), EXIF rotation applied.
- * Output is always `stem.jpg` so `/uploads/...` URLs stay stable and browsers get correct Content-Type
- * (WebP-as-.jpg was breaking images after older admin saves referenced .jpg).
- * Skips GIF (animation) and SVG.
+ * Admin uploads → JPEG, EXIF rotation applied, tuned to stay near UPLOAD_TARGET_BYTES (~100KB) for faster loads.
+ * Shrinks quality and longest edge until under target (or min quality / min edge).
+ * Output is always `stem.jpg`. Skips GIF (animation) and SVG.
  */
 async function optimizeRasterUpload(absPath, mimetype) {
   if (!mimetype || !String(mimetype).startsWith("image/")) return null;
@@ -45,14 +46,39 @@ async function optimizeRasterUpload(absPath, mimetype) {
   const tmpPath = path.join(dir, stem + ".opt-" + Date.now() + ".jpg");
   try {
     const meta = await sharpLib(absPath).metadata();
-    let s = sharpLib(absPath).rotate().resize(2048, 2048, {
-      fit: "inside",
-      withoutEnlargement: true,
-    });
-    if (meta.hasAlpha) {
-      s = s.flatten({ background: { r: 255, g: 255, b: 255 } });
+    const hasAlpha = !!meta.hasAlpha;
+    const target = UPLOAD_TARGET_BYTES;
+    let maxEdge = 2048;
+    let quality = 82;
+    let buf = null;
+
+    for (let attempt = 0; attempt < 36; attempt++) {
+      let img = sharpLib(absPath).rotate().resize(maxEdge, maxEdge, {
+        fit: "inside",
+        withoutEnlargement: true,
+      });
+      if (hasAlpha) {
+        img = img.flatten({ background: { r: 255, g: 255, b: 255 } });
+      }
+      buf = await img
+        .jpeg({
+          quality,
+          mozjpeg: true,
+          chromaSubsampling: "4:2:0",
+        })
+        .toBuffer();
+      if (buf.length <= target) break;
+      if (quality > 44) {
+        quality -= 7;
+      } else if (maxEdge > 400) {
+        maxEdge = Math.max(400, Math.floor(maxEdge * 0.72));
+        quality = Math.min(quality + 4, 78);
+      } else {
+        quality = Math.max(28, quality - 5);
+      }
     }
-    await s.jpeg({ quality: 86, mozjpeg: true }).toFile(tmpPath);
+
+    await fs.promises.writeFile(tmpPath, buf);
     await fs.promises.unlink(absPath).catch(() => {});
     await fs.promises.rename(tmpPath, outPath);
     return outPath;

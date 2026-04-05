@@ -52,52 +52,6 @@
     );
   }
 
-  /** 3D tilt on move (pointer + touch) for marquees — desktop & mobile. */
-  function wireMarqueeTilt(wrap) {
-    if (!wrap || wrap.dataset.kietTiltWired) return;
-    wrap.dataset.kietTiltWired = "1";
-    wrap.style.transformStyle = "preserve-3d";
-    wrap.style.touchAction = "none";
-    function applyNorm(nx, ny) {
-      var tiltX = ny * -12;
-      var tiltY = nx * 12;
-      wrap.style.transform = "perspective(520px) rotateX(" + tiltX + "deg) rotateY(" + tiltY + "deg)";
-    }
-    function reset() {
-      wrap.style.transform = "";
-    }
-    function normFromClient(clientX, clientY) {
-      var r = wrap.getBoundingClientRect();
-      if (!r.width || !r.height) return;
-      applyNorm((clientX - r.left) / r.width - 0.5, (clientY - r.top) / r.height - 0.5);
-    }
-    wrap.addEventListener("pointerdown", function (ev) {
-      try {
-        if (wrap.setPointerCapture) wrap.setPointerCapture(ev.pointerId);
-      } catch (e) {
-        /* ignore */
-      }
-    });
-    wrap.addEventListener("pointermove", function (ev) {
-      if (ev.pointerType === "mouse" && ev.buttons === 0) return;
-      normFromClient(ev.clientX, ev.clientY);
-    });
-    wrap.addEventListener("pointerleave", reset);
-    wrap.addEventListener("pointercancel", reset);
-    wrap.addEventListener("pointerup", reset);
-    wrap.addEventListener(
-      "touchmove",
-      function (ev) {
-        if (!ev.touches || !ev.touches[0]) return;
-        var t = ev.touches[0];
-        normFromClient(t.clientX, t.clientY);
-      },
-      { passive: true }
-    );
-    wrap.addEventListener("touchend", reset);
-    wrap.addEventListener("touchcancel", reset);
-  }
-
   function track(type, section, payload) {
     fetch("/api/analytics", {
       method: "POST",
@@ -256,7 +210,7 @@
         return '<a href="#/" data-sec="' + p.id + '">' + esc(p.lab) + "</a>";
       })
       .join("");
-    el.innerHTML = inner + inner + inner + inner;
+    el.innerHTML = inner;
     el.onclick = function (e) {
       var a = e.target.closest("a[data-sec]");
       if (!a) return;
@@ -274,7 +228,6 @@
         if (t) t.scrollIntoView({ behavior: "smooth" });
       }, 150);
     };
-    wireMarqueeTilt($("section-marquee-wrap"));
   }
 
   function wireNavRgb() {
@@ -359,8 +312,7 @@
       })
       .join("");
     if (!html) return;
-    root.innerHTML = html + html;
-    wireMarqueeTilt($("placements-marquee-wrap"));
+    root.innerHTML = html;
   }
 
   var currentStream = null;
@@ -451,12 +403,10 @@
       );
     };
     var row = list.map(cell).join("");
-    var trackHtml = row + row;
     var outer = document.createElement("div");
-    outer.className = "mou-partners-marquee mou-marquee-tilt";
-    outer.innerHTML = '<div class="mou-partners-track">' + trackHtml + "</div>";
+    outer.className = "mou-partners-marquee";
+    outer.innerHTML = '<div class="mou-partners-track kiet-rotate-sway">' + row + "</div>";
     wrap.appendChild(outer);
-    wireMarqueeTilt(outer);
   }
 
   function renderVision() {
