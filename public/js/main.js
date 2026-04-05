@@ -572,14 +572,17 @@
   function renderClubs(containerId) {
     var root = $(containerId);
     if (!root) return;
-    var sec = root.closest("section#clubs");
+    var homeSec = $("clubs");
+    var aboutClubsSec = $("about-clubs");
     var list = asArray(SITE.clubs);
     if (!list.length) {
       root.innerHTML = "";
-      if (sec) sec.classList.add("hidden");
+      if (containerId === "clubs-grid-home" && homeSec) homeSec.classList.add("hidden");
+      if (containerId === "clubs-grid-about" && aboutClubsSec) aboutClubsSec.classList.add("hidden");
       return;
     }
-    if (sec) sec.classList.remove("hidden");
+    if (containerId === "clubs-grid-home" && homeSec) homeSec.classList.remove("hidden");
+    if (containerId === "clubs-grid-about" && aboutClubsSec) aboutClubsSec.classList.remove("hidden");
     root.innerHTML = "";
     list.forEach(function (c) {
       var insta =
@@ -1231,6 +1234,7 @@
     renderMOU();
     renderVision();
     renderClubs("clubs-grid-home");
+    renderClubs("clubs-grid-about");
     renderTimeline();
     setupTimelineScroll();
     renderAbout();

@@ -274,7 +274,7 @@
       "subtitle": "KIET Robotics Lab",
       "blurb": "Build bots, compete, and learn by making.",
       "instagram": "https://instagram.com/robotics_kiet",
-      "image": "https://images.unsplash.com/photo-1581092160562-40aa08e78837?w=600&fit=crop"
+      "image": "/images/clubs/club-tech.png"
     },
     {
       "id": "cl-a26x2x4tmwh",
@@ -282,7 +282,7 @@
       "subtitle": "GDSC",
       "blurb": "Student dev community for Google technologies.",
       "instagram": "https://instagram.com/gdsc_kiet",
-      "image": "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=600&fit=crop"
+      "image": "/images/clubs/club-gdsc.png"
     },
     {
       "id": "cl-sasenoxi0vq",
@@ -290,7 +290,7 @@
       "subtitle": "KIET Cyber Crew",
       "blurb": "Ethical hacking drills and safe digital habits.",
       "instagram": "https://instagram.com/cyber_crew_kiet",
-      "image": "https://images.unsplash.com/photo-1563986768609-322da13575f3?w=600&fit=crop"
+      "image": "/images/clubs/club-security.png"
     },
     {
       "id": "cl-pbfcn6hoz1k",
@@ -298,7 +298,7 @@
       "subtitle": "KIET GCC",
       "blurb": "Contests, peer learning, and late-night debug sessions.",
       "instagram": "https://instagram.com/gcc_kiet",
-      "image": "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=600&fit=crop"
+      "image": "/images/clubs/club-coding.png"
     },
     {
       "id": "cl-fq7r61h6ylv",
@@ -306,7 +306,7 @@
       "subtitle": "Student leadership cell",
       "blurb": "Plan events, represent peers, grow confidence.",
       "instagram": "",
-      "image": "https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=600&fit=crop"
+      "image": "/images/clubs/club-leadership.png"
     },
     {
       "id": "cl-jkah1mxpo7",
@@ -314,7 +314,7 @@
       "subtitle": "Play, Compete & Win",
       "blurb": "Grounds, teams, and house spirit all year.",
       "instagram": "https://instagram.com/kiet_culture",
-      "image": "https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=600&fit=crop"
+      "image": "/images/clubs/club-sports.png"
     },
     {
       "id": "cl-6h54edp6mdo",
@@ -322,7 +322,7 @@
       "subtitle": "Toastmasters — Speak, Lead, Communicate",
       "blurb": "Weekly meetings to speak with clarity and calm.",
       "instagram": "https://instagram.com/toastmasterskiet",
-      "image": "https://images.unsplash.com/photo-1475721027785-f74eccf877e2?w=600&fit=crop"
+      "image": "/images/clubs/club-speaking.png"
     }
   ],
   "difference": [
