@@ -133,6 +133,7 @@
 
   function campusBlock(ev) {
     var uid = "ci-" + Math.random().toString(36).slice(2);
+    var uidDetail = "cid-" + Math.random().toString(36).slice(2);
     var w = block(
       "<h3>Campus event</h3>" +
         '<label>Title<input type="text" class="c-title" value="' +
@@ -141,13 +142,21 @@
         '<label>Summary<input type="text" class="c-sum" value="' +
         escAttr(ev.summary) +
         '" /></label>' +
-        '<div class="up-row"><label>Media</label><input type="file" accept="image/*,video/*" data-upload-target="' +
+        '<div class="up-row"><label>List thumbnail</label><input type="file" accept="image/*,video/*" data-upload-target="' +
         uid +
         '" /><input type="text" class="grow c-img" id="' +
         uid +
         '" value="' +
         escAttr(ev.image) +
         '" /></div>' +
+        '<div class="up-row"><label>Detail page hero (optional)</label><input type="file" accept="image/*,video/*" data-upload-target="' +
+        uidDetail +
+        '" /><input type="text" class="grow c-detail-img" id="' +
+        uidDetail +
+        '" value="' +
+        escAttr(ev.detailImage || "") +
+        '" /></div>' +
+        '<p class="hint" style="margin:0 0 0.5rem;font-size:0.8rem;">Thumbnail = home card; detail hero = large image on the story page.</p>' +
         '<label>Long text (modal)<textarea class="c-body" rows="3">' +
         escText(ev.body) +
         "</textarea></label>" +
@@ -316,6 +325,7 @@
         title: w.querySelector(".c-title").value.trim(),
         summary: w.querySelector(".c-sum").value.trim(),
         image: w.querySelector(".c-img").value.trim(),
+        detailImage: (w.querySelector(".c-detail-img") && w.querySelector(".c-detail-img").value.trim()) || "",
         body: w.querySelector(".c-body").value.trim(),
         gallery: w
           .querySelector(".c-gal")

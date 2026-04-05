@@ -70,7 +70,8 @@ body {
   position: relative;
   min-height: 72vh;
   min-height: 72dvh;
-  background: #000;
+  background: #1a1a1a;
+  overflow: hidden;
 }
 
 .hero-full-bg {
@@ -78,6 +79,17 @@ body {
   inset: 0;
   background-size: cover;
   background-position: center;
+}
+
+.hero-full-bg .hero-bg-img,
+.hero-full-bg .hero-bg-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
 }
 
 .hero-full-overlay {
@@ -231,10 +243,17 @@ body {
   opacity: 1;
 }
 
+@media (max-width: 720px) {
+  .hero-full {
+    min-height: 88svh;
+    min-height: 88dvh;
+  }
+}
+
 @media (max-width: 480px) {
   .hero-full {
-    min-height: 64vh;
-    min-height: 64dvh;
+    min-height: 85svh;
+    min-height: 85dvh;
   }
   .hero-stat-row {
     flex-direction: column;
@@ -331,9 +350,10 @@ body {
   touch-action: pan-y;
 }
 
-.marquee-tilt-wrap {
+.marquee-tilt-wrap,
+.mou-marquee-tilt {
   transform-style: preserve-3d;
-  transition: transform 0.12s ease-out;
+  transition: transform 0.1s ease-out;
 }
 
 .fade-edges::before,
@@ -452,7 +472,7 @@ body {
   margin-right: auto;
 }
 
-.section.section-mou-wide .mou-ticker-shell {
+.section.section-mou-wide .mou-partners-root {
   width: 100%;
 }
 
@@ -596,11 +616,34 @@ body {
   gap: 0.65rem;
 }
 
+.detail-hero {
+  margin: 0 0 1.25rem;
+  border-radius: 12px;
+  overflow: hidden;
+  max-height: min(56vh, 520px);
+  background: var(--surface);
+}
+
+.detail-hero img {
+  width: 100%;
+  height: 100%;
+  max-height: min(56vh, 520px);
+  object-fit: cover;
+  object-position: center;
+  display: block;
+  vertical-align: middle;
+}
+
 .detail-article img,
 .detail-article video {
   width: 100%;
   border-radius: 8px;
   border: 1px solid var(--line);
+}
+
+.detail-article .detail-hero img {
+  border: none;
+  border-radius: 0;
 }
 
 /* Placements marquee */
@@ -611,6 +654,7 @@ body {
   background: #fff;
   border-radius: 8px;
   border: 1px solid #e5e5e2;
+  transform-style: preserve-3d;
 }
 
 .placements-marquee-track {
@@ -831,33 +875,34 @@ body {
   cursor: not-allowed;
 }
 
-/* MOU — single white ticker, grey caps + dot separators (placements-style) */
-.mou-rows-tight.mou-ticker-shell {
-  border: 1px solid #e5e5e2;
-  border-radius: 8px;
-  overflow: hidden;
-  background: #fff;
+/* MOU — partner logos (no outer box), marquee + pointer tilt on .mou-marquee-tilt */
+.mou-partners-root {
+  margin: 0;
+  padding: 0;
 }
 
-.mou-ticker-wrap {
+.mou-partners-marquee {
   overflow: hidden;
-  width: 100%;
+  position: relative;
+  padding: 0.35rem 0 0.65rem;
+  transform-style: preserve-3d;
 }
 
-.mou-ticker-track {
+.mou-partners-track {
   display: flex;
   flex-wrap: nowrap;
-  align-items: center;
+  align-items: flex-end;
+  gap: clamp(1.25rem, 4vw, 2.75rem);
   width: max-content;
-  padding: 0.48rem 0;
-  animation: mou-ticker-marquee 38s linear infinite;
+  padding: 0.25rem 0;
+  animation: mou-partners-marquee 48s linear infinite;
 }
 
-.mou-ticker-track:hover {
+.mou-partners-marquee:hover .mou-partners-track {
   animation-play-state: paused;
 }
 
-@keyframes mou-ticker-marquee {
+@keyframes mou-partners-marquee {
   0% {
     transform: translateX(0);
   }
@@ -866,24 +911,33 @@ body {
   }
 }
 
-.mou-ticker-name {
-  font-family: var(--font-sans);
-  font-weight: 700;
-  font-size: 0.74rem;
-  letter-spacing: 0.07em;
-  color: #6b6b69;
-  text-transform: uppercase;
-  white-space: nowrap;
-  padding: 0 0.2rem;
+.mou-partner-cell {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  min-width: 92px;
+  max-width: 150px;
+  text-align: center;
 }
 
-.mou-ticker-dot {
-  color: #9ca3af;
+.mou-partner-logo {
+  width: auto;
+  height: clamp(52px, 12vw, 80px);
+  max-width: 130px;
+  object-fit: contain;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.06));
+}
+
+.mou-partner-name {
+  font-family: var(--font-sans);
+  font-size: clamp(0.62rem, 2.4vw, 0.75rem);
   font-weight: 700;
-  font-size: 0.85rem;
-  line-height: 1;
-  padding: 0 0.12rem;
-  user-select: none;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #5a5a58;
+  line-height: 1.2;
 }
 
 /* Vision */
@@ -1741,8 +1795,6 @@ button.fab-opt {
   height: 100%;
   object-fit: cover;
   display: block;
-  content-visibility: auto;
-  contain-intrinsic-size: 240px 160px;
 }
 
 .spot-card-img,

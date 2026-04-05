@@ -31,16 +31,62 @@
     return s ? "url(" + JSON.stringify(s) + ")" : "none";
   }
 
-  function cardImgHtml(url, wrapClass) {
+  /**
+   * opts.lazy false = eager (above-the-fold). opts.priority = fetchpriority high.
+   */
+  function cardImgHtml(url, wrapClass, opts) {
+    opts = opts || {};
     var u = String(url || "").trim();
     if (!u) return '<div class="' + wrapClass + ' ph-empty"></div>';
+    var loadAttr = opts.lazy === false ? ' loading="eager"' : ' loading="lazy"';
+    var fpAttr = opts.priority ? ' fetchpriority="high"' : "";
     return (
       '<div class="' +
       wrapClass +
       '"><img src="' +
       esc(u) +
-      '" alt="" loading="lazy" decoding="async" fetchpriority="low" /></div>'
+      '" alt="" decoding="async"' +
+      loadAttr +
+      fpAttr +
+      " /></div>"
     );
+  }
+
+  /** 3D tilt on move (pointer + touch) for marquees — desktop & mobile. */
+  function wireMarqueeTilt(wrap) {
+    if (!wrap || wrap.dataset.kietTiltWired) return;
+    wrap.dataset.kietTiltWired = "1";
+    wrap.style.transformStyle = "preserve-3d";
+    function applyNorm(nx, ny) {
+      var tiltX = ny * -12;
+      var tiltY = nx * 12;
+      wrap.style.transform = "perspective(520px) rotateX(" + tiltX + "deg) rotateY(" + tiltY + "deg)";
+    }
+    function reset() {
+      wrap.style.transform = "";
+    }
+    function normFromClient(clientX, clientY) {
+      var r = wrap.getBoundingClientRect();
+      if (!r.width || !r.height) return;
+      applyNorm((clientX - r.left) / r.width - 0.5, (clientY - r.top) / r.height - 0.5);
+    }
+    wrap.addEventListener(
+      "touchmove",
+      function (ev) {
+        if (!ev.touches || !ev.touches[0]) return;
+        var t = ev.touches[0];
+        normFromClient(t.clientX, t.clientY);
+      },
+      { passive: true }
+    );
+    wrap.addEventListener("touchend", reset);
+    wrap.addEventListener("touchcancel", reset);
+    wrap.addEventListener("pointermove", function (ev) {
+      if (ev.pointerType === "touch") return;
+      normFromClient(ev.clientX, ev.clientY);
+    });
+    wrap.addEventListener("pointerleave", reset);
+    wrap.addEventListener("pointercancel", reset);
   }
 
   function track(type, section, payload) {
@@ -193,8 +239,9 @@
       { id: "placements", lab: "Placements" },
       { id: "programs", lab: "Programs" },
       { id: "mou", lab: "Industry MOU" },
-      { id: "vision", lab: "Visionaries" },
     ];
+    if (asArray(SITE.clubs).length) parts.push({ id: "clubs", lab: "Clubs" });
+    parts.push({ id: "vision", lab: "Visionaries" });
     var inner = parts
       .map(function (p) {
         return '<a href="#/" data-sec="' + p.id + '">' + esc(p.lab) + "</a>";
@@ -218,28 +265,7 @@
         if (t) t.scrollIntoView({ behavior: "smooth" });
       }, 150);
     };
-    var wrap = $("section-marquee-wrap");
-    if (wrap) {
-      var tiltX = 0;
-      var tiltY = 0;
-      wrap.addEventListener(
-        "touchmove",
-        function (ev) {
-          if (!ev.touches || !ev.touches[0]) return;
-          var t = ev.touches[0];
-          var r = wrap.getBoundingClientRect();
-          var px = (t.clientX - r.left) / r.width - 0.5;
-          var py = (t.clientY - r.top) / r.height - 0.5;
-          tiltX = py * -14;
-          tiltY = px * 14;
-          wrap.style.transform = "perspective(420px) rotateX(" + tiltX + "deg) rotateY(" + tiltY + "deg)";
-        },
-        { passive: true }
-      );
-      wrap.addEventListener("touchend", function () {
-        wrap.style.transform = "";
-      });
-    }
+    wireMarqueeTilt($("section-marquee-wrap"));
   }
 
   function wireNavRgb() {
@@ -276,13 +302,14 @@
   function renderSpotlight() {
     var root = $("spotlight-list");
     root.innerHTML = "";
-    asArray(SITE.campusSpotlight).forEach(function (ev) {
+    asArray(SITE.campusSpotlight).forEach(function (ev, idx) {
       var id = esc(ev.id || "");
       var a = document.createElement("a");
       a.className = "spot-card";
       a.href = "#/spotlight/" + encodeURIComponent(ev.id || "");
+      var aboveFold = idx < 3;
       a.innerHTML =
-        cardImgHtml(ev.image, "spot-card-img") +
+        cardImgHtml(ev.image, "spot-card-img", { lazy: !aboveFold, priority: aboveFold }) +
         '<div class="spot-card-body"><h3>' +
         esc(ev.title) +
         "</h3><p>" +
@@ -299,7 +326,8 @@
     var root = $("placements-list");
     root.innerHTML = "";
     var items = asArray(SITE.placements);
-    function cardHtml(p) {
+    function cardHtml(p, idx) {
+      var af = idx < 2;
       return (
         '<div class="p-card-marquee"><div class="p-card-side"><h3>' +
         esc(p.studentName) +
@@ -312,13 +340,18 @@
         '</div><div class="pkg">' +
         esc(p.package) +
         "</div></div>" +
-        cardImgHtml(p.image, "p-card-photo") +
+        cardImgHtml(p.image, "p-card-photo", { lazy: !af, priority: af }) +
         "</div>"
       );
     }
-    var html = items.map(cardHtml).join("");
+    var html = items
+      .map(function (p, idx) {
+        return cardHtml(p, idx);
+      })
+      .join("");
     if (!html) return;
     root.innerHTML = html + html;
+    wireMarqueeTilt($("placements-marquee-wrap"));
   }
 
   var currentStream = null;
@@ -393,16 +426,30 @@
     wrap.innerHTML = "";
     var list = asArray(SITE.industryMOU);
     if (!list.length) return;
-    var names = list.map(function (c) {
-      return '<span class="mou-ticker-name">' + esc(c.name) + "</span>";
-    });
-    var dot = '<span class="mou-ticker-dot" aria-hidden="true">·</span>';
-    var segment = names.join(dot);
-    var loop = segment + dot + segment;
-    var inner = document.createElement("div");
-    inner.className = "mou-ticker-wrap";
-    inner.innerHTML = '<div class="mou-ticker-track">' + loop + "</div>";
-    wrap.appendChild(inner);
+    var cell = function (c, i) {
+      var logo = String(c.logo || "").trim();
+      var img = logo
+        ? '<img class="mou-partner-logo" src="' +
+          esc(logo) +
+          '" alt="" width="96" height="96" loading="' +
+          (i < 8 ? "eager" : "lazy") +
+          '" decoding="async" />'
+        : '<div class="mou-partner-logo ph-empty"></div>';
+      return (
+        '<div class="mou-partner-cell">' +
+        img +
+        '<span class="mou-partner-name">' +
+        esc(c.name) +
+        "</span></div>"
+      );
+    };
+    var row = list.map(cell).join("");
+    var trackHtml = row + row;
+    var outer = document.createElement("div");
+    outer.className = "mou-partners-marquee mou-marquee-tilt fade-edges";
+    outer.innerHTML = '<div class="mou-partners-track">' + trackHtml + "</div>";
+    wrap.appendChild(outer);
+    wireMarqueeTilt(outer);
   }
 
   function renderVision() {
@@ -428,8 +475,16 @@
   function renderClubs(containerId) {
     var root = $(containerId);
     if (!root) return;
+    var sec = root.closest("section#clubs");
+    var list = asArray(SITE.clubs);
+    if (!list.length) {
+      root.innerHTML = "";
+      if (sec) sec.classList.add("hidden");
+      return;
+    }
+    if (sec) sec.classList.remove("hidden");
     root.innerHTML = "";
-    asArray(SITE.clubs).forEach(function (c) {
+    list.forEach(function (c) {
       var insta =
         c.instagram && c.instagram.length
           ? '<a class="insta-link" href="' +
@@ -653,7 +708,14 @@
         return;
       }
       var gal = (ev.gallery || []).map(mediaHtml).join("");
+      var detailImg = String(ev.detailImage || ev.image || "").trim();
+      var heroBlock = detailImg
+        ? '<div class="detail-hero"><img src="' +
+          esc(detailImg) +
+          '" alt="" loading="eager" decoding="async" fetchpriority="high" /></div>'
+        : "";
       root.innerHTML =
+        heroBlock +
         "<h1>" +
         esc(ev.title) +
         '</h1><p class="detail-summary">' +
@@ -968,7 +1030,7 @@
       },
       { threshold: 0.2 }
     );
-    ["spotlight", "placements", "programs", "mou", "vision", "difference"].forEach(function (id) {
+    ["spotlight", "placements", "programs", "mou", "clubs", "vision", "difference"].forEach(function (id) {
       var el = document.getElementById(id);
       if (el) {
         el.setAttribute("data-track", id);
@@ -990,16 +1052,33 @@
     loadPixels(SITE.pixels || {});
 
     var hero = SITE.hero || {};
-    var heroImgPre = hero.image ? String(hero.image).trim() : "";
-    if (heroImgPre && !document.querySelector("link[data-kiet-preload-hero]")) {
-      var pl = document.createElement("link");
-      pl.rel = "preload";
-      pl.as = "image";
-      pl.href = heroImgPre;
-      pl.setAttribute("data-kiet-preload-hero", "1");
-      document.head.appendChild(pl);
+    var hbg = $("hero-bg");
+    var hi = hero.image ? String(hero.image).trim() : "";
+    hbg.innerHTML = "";
+    hbg.style.backgroundImage = "none";
+    if (hi) {
+      if (isVideoUrl(hi)) {
+        var vid = document.createElement("video");
+        vid.className = "hero-bg-video";
+        vid.src = hi;
+        vid.muted = true;
+        vid.loop = true;
+        vid.playsInline = true;
+        vid.setAttribute("playsinline", "");
+        vid.setAttribute("aria-hidden", "true");
+        hbg.appendChild(vid);
+        vid.play().catch(function () {});
+      } else {
+        var im = document.createElement("img");
+        im.className = "hero-bg-img";
+        im.src = hi;
+        im.alt = "";
+        im.decoding = "async";
+        im.setAttribute("fetchpriority", "high");
+        im.setAttribute("aria-hidden", "true");
+        hbg.appendChild(im);
+      }
     }
-    $("hero-bg").style.backgroundImage = cssBgUrl(hero.image);
     applyHeroPackageLine($("hero-package"), hero.packageLine || "");
     $("hero-lbl-left").textContent = hero.statLeftLabel || "Students";
     $("hero-lbl-right").textContent = hero.statRightLabel || "Placements";
@@ -1022,7 +1101,7 @@
     renderPrograms();
     renderMOU();
     renderVision();
-    renderClubs("clubs-grid-about");
+    renderClubs("clubs-grid-home");
     renderTimeline();
     setupTimelineScroll();
     renderAbout();

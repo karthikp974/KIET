@@ -25,6 +25,7 @@
       "id": "c-ibqxnqa3qha",
       "title": "Annual Tech Fest",
       "summary": "Hackathons, expos, and cultural night — a week the whole campus looks forward to.",
+      "detailImage": "",
       "image": "/uploads/f-1775330698604-i151sh.jpg",
       "body": "Add a longer story here in admin: judges, prizes, student teams, and photos from the event.",
       "gallery": [
@@ -36,6 +37,7 @@
       "id": "c-qc8eznbryfk",
       "title": "Industry on campus",
       "summary": "Leaders from partner companies visit for talks and live problem-solving sessions.",
+      "detailImage": "",
       "image": "https://images.unsplash.com/photo-1475721027785-f74eccf877e2?w=600&h=600&fit=crop",
       "body": "Describe sessions, student takeaways, and follow-up internships or projects.",
       "gallery": []
@@ -180,19 +182,19 @@
     },
     {
       "name": "KIET Smart City Lab",
-      "logo": "/uploads/f-1775322498725-evnqjb.jpg"
+      "logo": "https://www.google.com/s2/favicons?domain=kiet.edu.in&sz=128"
     },
     {
       "name": "Toastmasters",
-      "logo": "/uploads/f-1775330717896-zfll39.jpg"
+      "logo": "https://www.google.com/s2/favicons?domain=toastmasters.org&sz=128"
     },
     {
       "name": "KIET Robotics Lab",
-      "logo": "/uploads/f-1775322555644-99gp71.jpg"
+      "logo": "https://www.google.com/s2/favicons?domain=kiet.edu.in&sz=128"
     },
     {
       "name": "Microsoft AICW",
-      "logo": "https://www.google.com/s2/favicons?domain=microsoft.com&sz=128"
+      "logo": "https://www.google.com/s2/favicons?domain=microsoft.com&sz=256"
     },
     {
       "name": "Oracle Academy",
