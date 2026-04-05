@@ -44,8 +44,8 @@
 
         <section class="tab-panel on" id="t-home">
           <p class="hint admin-upload-hint">
-            <strong>Uploads from PC or phone:</strong> choose a file in admin — the server saves it, converts photos to
-            compressed <strong>WebP</strong> (faster loading, like social apps), and fills the URL for you.
+            <strong>Uploads from PC or phone:</strong> choose a file in admin — the server saves it, compresses photos to
+            <strong>JPEG</strong> (max ~2048px, correct <code>.jpg</code> URL), and fills the field for you.
             <strong>Railway:</strong> set env <code>UPLOADS_DIR</code> to a folder on a
             <strong>persistent volume</strong> (e.g. <code>/data/uploads</code>) so files survive redeploys. Otherwise
             use full <code>https://…</code> image links for anything you cannot afford to lose.

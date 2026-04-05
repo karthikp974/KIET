@@ -23,8 +23,10 @@ const ADMIN_PASSWORD_VISI = process.env.ADMIN_PASSWORD_VISI || "Adminvisi";
 fs.mkdirSync(UPLOADS, { recursive: true });
 
 /**
- * Phone / DSLR photos → WebP (max ~2048px), EXIF rotation applied. Skips GIF (animation) and SVG.
- * Returns absolute path to final file, or null to keep original upload.
+ * Phone / DSLR photos → JPEG (max ~2048px, mozjpeg), EXIF rotation applied.
+ * Output is always `stem.jpg` so `/uploads/...` URLs stay stable and browsers get correct Content-Type
+ * (WebP-as-.jpg was breaking images after older admin saves referenced .jpg).
+ * Skips GIF (animation) and SVG.
  */
 async function optimizeRasterUpload(absPath, mimetype) {
   if (!mimetype || !String(mimetype).startsWith("image/")) return null;
@@ -39,14 +41,18 @@ async function optimizeRasterUpload(absPath, mimetype) {
   const ext = path.extname(absPath);
   const dir = path.dirname(absPath);
   const stem = path.basename(absPath, ext);
-  const outPath = path.join(dir, stem + ".webp");
-  const tmpPath = path.join(dir, stem + ".opt-" + Date.now() + ".webp");
+  const outPath = path.join(dir, stem + ".jpg");
+  const tmpPath = path.join(dir, stem + ".opt-" + Date.now() + ".jpg");
   try {
-    await sharpLib(absPath)
-      .rotate()
-      .resize(2048, 2048, { fit: "inside", withoutEnlargement: true })
-      .webp({ quality: 82, effort: 4 })
-      .toFile(tmpPath);
+    const meta = await sharpLib(absPath).metadata();
+    let s = sharpLib(absPath).rotate().resize(2048, 2048, {
+      fit: "inside",
+      withoutEnlargement: true,
+    });
+    if (meta.hasAlpha) {
+      s = s.flatten({ background: { r: 255, g: 255, b: 255 } });
+    }
+    await s.jpeg({ quality: 86, mozjpeg: true }).toFile(tmpPath);
     await fs.promises.unlink(absPath).catch(() => {});
     await fs.promises.rename(tmpPath, outPath);
     return outPath;
@@ -286,6 +292,18 @@ app.get("/api/me", (req, res) => {
   res.json({ ok: !!role, role: role || null });
 });
 
+/** Full streams/branches template from repo (used if DB saved an empty list by mistake). */
+let bundledProgramStreams = [];
+try {
+  const rawBundled = fs.readFileSync(path.join(PUBLIC, "data", "site.json"), "utf8");
+  const bundledSite = JSON.parse(rawBundled);
+  if (Array.isArray(bundledSite.programStreams) && bundledSite.programStreams.length) {
+    bundledProgramStreams = bundledSite.programStreams;
+  }
+} catch (e) {
+  console.warn("Bundled programStreams defaults not loaded:", e && e.message ? e.message : e);
+}
+
 /** Avoid blank public pages when site JSON lists are stored as wrong type (e.g. programStreams as {}). */
 function sanitizeSiteForClient(data) {
   if (!data || typeof data !== "object" || Array.isArray(data)) return data;
@@ -301,6 +319,11 @@ function sanitizeSiteForClient(data) {
   const o = { ...data };
   for (const k of listKeys) {
     if (o[k] != null && !Array.isArray(o[k])) o[k] = [];
+  }
+  if (!Array.isArray(o.programStreams) || o.programStreams.length === 0) {
+    if (bundledProgramStreams.length) {
+      o.programStreams = JSON.parse(JSON.stringify(bundledProgramStreams));
+    }
   }
   return o;
 }
