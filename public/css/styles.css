@@ -24,6 +24,7 @@
 
 html {
   scroll-behavior: smooth;
+  overflow-x: clip;
 }
 
 body {
@@ -33,6 +34,11 @@ body {
   background: var(--bg);
   line-height: 1.55;
   font-size: 1.02rem;
+  overflow-x: clip;
+}
+
+#app {
+  overflow-x: clip;
 }
 
 .sr-only {
@@ -245,16 +251,50 @@ body {
 
 @media (max-width: 720px) {
   .hero-full {
-    min-height: 88svh;
-    min-height: 88dvh;
+    min-height: 100svh;
+    min-height: 100dvh;
+    min-height: -webkit-fill-available;
+  }
+
+  /* Pull nav onto hero so the first screen is mostly photo, not a solid black bar */
+  #dual-nav {
+    margin-top: -3.25rem;
+    position: relative;
+    z-index: 55;
+    background: transparent;
+    border-bottom: none;
+    box-shadow: none;
+  }
+
+  #dual-nav .dual-nav-sections-wrap.section-marquee-bar {
+    background: rgba(0, 0, 0, 0.52);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 14px 14px 0 0;
+    margin-left: auto;
+    margin-right: auto;
+    max-width: min(calc(100vw - 1rem), 720px);
+    box-shadow: 0 6px 28px rgba(0, 0, 0, 0.22);
+  }
+
+  #dual-nav .nav-pages-bar {
+    background: #fff;
+    border: 1px solid var(--line);
+    border-top: 1px solid rgba(0, 0, 0, 0.06);
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.1);
+  }
+
+  /* After scroll, section marquee hides — restore solid bar so content doesn’t show through */
+  #dual-nav:has(#nav-marquee-row.marquee-scrolled-out) {
+    margin-top: 0;
+    background: var(--bg);
+    border-bottom: 1px solid var(--line);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
   }
 }
 
 @media (max-width: 480px) {
-  .hero-full {
-    min-height: 85svh;
-    min-height: 85dvh;
-  }
   .hero-stat-row {
     flex-direction: column;
     align-items: flex-start;

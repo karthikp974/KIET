@@ -57,6 +57,7 @@
     if (!wrap || wrap.dataset.kietTiltWired) return;
     wrap.dataset.kietTiltWired = "1";
     wrap.style.transformStyle = "preserve-3d";
+    wrap.style.touchAction = "none";
     function applyNorm(nx, ny) {
       var tiltX = ny * -12;
       var tiltY = nx * 12;
@@ -70,6 +71,20 @@
       if (!r.width || !r.height) return;
       applyNorm((clientX - r.left) / r.width - 0.5, (clientY - r.top) / r.height - 0.5);
     }
+    wrap.addEventListener("pointerdown", function (ev) {
+      try {
+        if (wrap.setPointerCapture) wrap.setPointerCapture(ev.pointerId);
+      } catch (e) {
+        /* ignore */
+      }
+    });
+    wrap.addEventListener("pointermove", function (ev) {
+      if (ev.pointerType === "mouse" && ev.buttons === 0) return;
+      normFromClient(ev.clientX, ev.clientY);
+    });
+    wrap.addEventListener("pointerleave", reset);
+    wrap.addEventListener("pointercancel", reset);
+    wrap.addEventListener("pointerup", reset);
     wrap.addEventListener(
       "touchmove",
       function (ev) {
@@ -81,12 +96,6 @@
     );
     wrap.addEventListener("touchend", reset);
     wrap.addEventListener("touchcancel", reset);
-    wrap.addEventListener("pointermove", function (ev) {
-      if (ev.pointerType === "touch") return;
-      normFromClient(ev.clientX, ev.clientY);
-    });
-    wrap.addEventListener("pointerleave", reset);
-    wrap.addEventListener("pointercancel", reset);
   }
 
   function track(type, section, payload) {
@@ -105,7 +114,7 @@
   function mediaHtml(url) {
     if (!url) return "";
     if (isVideoUrl(url)) return "<video controls playsinline src=\"" + esc(url) + "\"></video>";
-    return "<img src=\"" + esc(url) + "\" alt=\"\" loading=\"lazy\" decoding=\"async\" />";
+    return "<img src=\"" + esc(url) + "\" alt=\"\" loading=\"eager\" decoding=\"async\" fetchpriority=\"auto\" />";
   }
 
   function closeApply() {
@@ -389,11 +398,11 @@
   function renderBranches(st) {
     var grid = $("branch-grid");
     grid.innerHTML = "";
-    asArray(st.branches).forEach(function (br) {
+    asArray(st.branches).forEach(function (br, idx) {
       var card = document.createElement("div");
       card.className = "branch-card";
       card.innerHTML =
-        cardImgHtml(br.image, "branch-card-img") +
+        cardImgHtml(br.image, "branch-card-img", { lazy: idx >= 4, priority: idx < 2 }) +
         '<div class="branch-card-body"><h3>' +
         esc(br.name) +
         "</h3><p>" +
@@ -426,14 +435,12 @@
     wrap.innerHTML = "";
     var list = asArray(SITE.industryMOU);
     if (!list.length) return;
-    var cell = function (c, i) {
+    var cell = function (c) {
       var logo = String(c.logo || "").trim();
       var img = logo
         ? '<img class="mou-partner-logo" src="' +
           esc(logo) +
-          '" alt="" width="96" height="96" loading="' +
-          (i < 8 ? "eager" : "lazy") +
-          '" decoding="async" />'
+          '" alt="" width="96" height="96" loading="eager" decoding="async" />'
         : '<div class="mou-partner-logo ph-empty"></div>';
       return (
         '<div class="mou-partner-cell">' +
@@ -446,7 +453,7 @@
     var row = list.map(cell).join("");
     var trackHtml = row + row;
     var outer = document.createElement("div");
-    outer.className = "mou-partners-marquee mou-marquee-tilt fade-edges";
+    outer.className = "mou-partners-marquee mou-marquee-tilt";
     outer.innerHTML = '<div class="mou-partners-track">' + trackHtml + "</div>";
     wrap.appendChild(outer);
     wireMarqueeTilt(outer);
@@ -1074,6 +1081,7 @@
         im.src = hi;
         im.alt = "";
         im.decoding = "async";
+        im.loading = "eager";
         im.setAttribute("fetchpriority", "high");
         im.setAttribute("aria-hidden", "true");
         hbg.appendChild(im);

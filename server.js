@@ -292,16 +292,20 @@ app.get("/api/me", (req, res) => {
   res.json({ ok: !!role, role: role || null });
 });
 
-/** Full streams/branches template from repo (used if DB saved an empty list by mistake). */
+/** Defaults from repo when DB lists are empty (accidental save). */
 let bundledProgramStreams = [];
+let bundledIndustryMOU = [];
 try {
   const rawBundled = fs.readFileSync(path.join(PUBLIC, "data", "site.json"), "utf8");
   const bundledSite = JSON.parse(rawBundled);
   if (Array.isArray(bundledSite.programStreams) && bundledSite.programStreams.length) {
     bundledProgramStreams = bundledSite.programStreams;
   }
+  if (Array.isArray(bundledSite.industryMOU) && bundledSite.industryMOU.length) {
+    bundledIndustryMOU = bundledSite.industryMOU;
+  }
 } catch (e) {
-  console.warn("Bundled programStreams defaults not loaded:", e && e.message ? e.message : e);
+  console.warn("Bundled site.json defaults not loaded:", e && e.message ? e.message : e);
 }
 
 /** Avoid blank public pages when site JSON lists are stored as wrong type (e.g. programStreams as {}). */
@@ -323,6 +327,11 @@ function sanitizeSiteForClient(data) {
   if (!Array.isArray(o.programStreams) || o.programStreams.length === 0) {
     if (bundledProgramStreams.length) {
       o.programStreams = JSON.parse(JSON.stringify(bundledProgramStreams));
+    }
+  }
+  if (!Array.isArray(o.industryMOU) || o.industryMOU.length === 0) {
+    if (bundledIndustryMOU.length) {
+      o.industryMOU = JSON.parse(JSON.stringify(bundledIndustryMOU));
     }
   }
   return o;
