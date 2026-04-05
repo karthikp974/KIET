@@ -76,22 +76,28 @@
   }
 
   var plcRafId = null;
+  var plcResizeHandler = null;
 
   function stopPlacementsMarquee() {
     if (plcRafId != null) {
       cancelAnimationFrame(plcRafId);
       plcRafId = null;
     }
+    if (plcResizeHandler) {
+      window.removeEventListener("resize", plcResizeHandler);
+      plcResizeHandler = null;
+    }
   }
 
-  /** Duplicated strip + slow translate marquee; prev/next nudge and briefly pause auto-scroll. */
-  function wirePlacementsStrip() {
+  /** One full-width card per view; arrows overlaid on the card area. */
+  function wirePlacementsSlider() {
     stopPlacementsMarquee();
     var carousel = $("placements-carousel");
+    var vp = $("placements-viewport");
     var track = $("placements-list");
     var prev = $("placements-prev");
     var next = $("placements-next");
-    if (!carousel || !track) return;
+    if (!carousel || !vp || !track) return;
 
     var items = asArray(SITE.placements);
     if (!items.length) {
@@ -100,54 +106,43 @@
     }
     carousel.classList.remove("hidden");
 
-    var html = track.innerHTML;
-    if (!html) {
-      carousel.classList.add("hidden");
-      return;
-    }
-    track.innerHTML = html + html;
+    var plcIdx = 0;
 
-    var offset = 0;
-    var speed = 0.35;
-    var pauseUntil = 0;
-
-    function halfW() {
-      return Math.max(1, track.scrollWidth / 2);
+    function applyPlcTransform() {
+      var w = vp.clientWidth || 1;
+      track.style.transform = "translateX(" + -plcIdx * w + "px)";
     }
 
-    function tick() {
-      if (Date.now() > pauseUntil) {
-        offset += speed;
-        var h = halfW();
-        if (offset >= h) offset = 0;
-      }
-      track.style.transform = "translateX(" + -offset + "px)";
-      plcRafId = requestAnimationFrame(tick);
+    function goPlc(delta) {
+      if (!items.length) return;
+      plcIdx = (plcIdx + delta + items.length) % items.length;
+      applyPlcTransform();
     }
 
-    if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      plcRafId = requestAnimationFrame(tick);
-    }
-
-    function nudge(dx) {
-      pauseUntil = Date.now() + 4500;
-      var h = halfW();
-      offset += dx;
-      while (offset < 0) offset += h;
-      while (offset >= h) offset -= h;
-      track.style.transform = "translateX(" + -offset + "px)";
+    if (items.length <= 1) {
+      if (prev) prev.style.display = "none";
+      if (next) next.style.display = "none";
+    } else {
+      if (prev) prev.style.display = "";
+      if (next) next.style.display = "";
     }
 
     if (prev) {
       prev.onclick = function () {
-        nudge(-280);
+        goPlc(-1);
       };
     }
     if (next) {
       next.onclick = function () {
-        nudge(280);
+        goPlc(1);
       };
     }
+
+    plcResizeHandler = function () {
+      applyPlcTransform();
+    };
+    window.addEventListener("resize", plcResizeHandler, { passive: true });
+    requestAnimationFrame(applyPlcTransform);
   }
 
   var secRafId = null;
@@ -457,18 +452,18 @@
         "</div>"
       );
     }
-    var html = items
-      .map(function (p, idx) {
-        return cardHtml(p, idx);
-      })
-      .join("");
-    if (!html) {
+    if (!items.length) {
       var car = $("placements-carousel");
       if (car) car.classList.add("hidden");
       return;
     }
-    root.innerHTML = html;
-    wirePlacementsStrip();
+    items.forEach(function (p, idx) {
+      var slide = document.createElement("div");
+      slide.className = "plc-slide";
+      slide.innerHTML = cardHtml(p, idx);
+      root.appendChild(slide);
+    });
+    wirePlacementsSlider();
   }
 
   var currentStream = null;

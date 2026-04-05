@@ -60,13 +60,13 @@
           data-show-home-only
         >
           <div class="section-nav-carousel" id="section-nav-carousel">
-            <button type="button" class="sec-nav-btn sec-prev" id="section-marquee-prev" aria-label="Sections left">‹</button>
             <div class="section-marquee-viewport">
-              <div class="marquee marquee-section" id="section-marquee-wrap" aria-label="Sections on this page">
+              <button type="button" class="sec-nav-btn sec-prev" id="section-marquee-prev" aria-label="Sections left">‹</button>
+              <button type="button" class="sec-nav-btn sec-next" id="section-marquee-next" aria-label="Sections right">›</button>
+              <div class="marquee marquee-section section-marquee-inner" id="section-marquee-wrap" aria-label="Sections on this page">
                 <div class="marquee-track section-nav-marquee-strip" id="section-marquee"></div>
               </div>
             </div>
-            <button type="button" class="sec-nav-btn sec-next" id="section-marquee-next" aria-label="Sections right">›</button>
           </div>
         </div>
         <div class="dual-nav-row dual-nav-pages nav-pages-bar thin-nav-row">
@@ -88,14 +88,14 @@
           <div class="spotlight-list spotlight-compact" id="spotlight-list"></div>
         </section>
 
-        <section class="section" id="placements">
+        <section class="section section-placements-wide" id="placements">
           <h2 class="h-section">Placements</h2>
-          <div class="placements-carousel" id="placements-carousel">
-            <button type="button" class="plc-nav plc-prev" id="placements-prev" aria-label="Previous placements">‹</button>
-            <div class="placements-marquee-wrap" id="placements-viewport">
-              <div class="placements-marquee-track" id="placements-list"></div>
+          <div class="placements-slider" id="placements-carousel">
+            <div class="placements-slider-viewport" id="placements-viewport">
+              <div class="placements-slider-track" id="placements-list"></div>
+              <button type="button" class="plc-nav plc-on-card plc-prev" id="placements-prev" aria-label="Previous placement">‹</button>
+              <button type="button" class="plc-nav plc-on-card plc-next" id="placements-next" aria-label="Next placement">›</button>
             </div>
-            <button type="button" class="plc-nav plc-next" id="placements-next" aria-label="Next placements">›</button>
           </div>
         </section>
 

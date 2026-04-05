@@ -70,7 +70,7 @@ body {
   position: relative;
   min-height: 72vh;
   min-height: 72dvh;
-  background: #141414;
+  background: #0a0a0a;
   overflow: hidden;
 }
 
@@ -90,6 +90,18 @@ body {
   object-fit: cover;
   object-position: center;
   display: block;
+}
+
+/* Slight overscan kills thin letterboxing on some mobile GPUs */
+@media (max-width: 720px) {
+  .hero-full-bg .hero-bg-img,
+  .hero-full-bg .hero-bg-video {
+    width: 106%;
+    height: 106%;
+    left: -3%;
+    top: -3%;
+    object-fit: cover;
+  }
 }
 
 .hero-full-overlay {
@@ -244,15 +256,15 @@ body {
 }
 
 @media (max-width: 720px) {
-  /* Full-viewport hero on phones; fallbacks if svh is wrong in embedded browsers */
+  /* Edge-to-edge hero — avoid 70vh so bars don’t show when svh/dvh differ from image */
   .hero-full {
-    min-height: 70vh;
-    min-height: 100svh;
     min-height: 100dvh;
+    min-height: 100svh;
+    min-height: 100lvh;
     min-height: -webkit-fill-available;
-    height: 70vh;
-    height: 100svh;
     height: 100dvh;
+    height: 100svh;
+    height: 100lvh;
     height: -webkit-fill-available;
   }
 
@@ -260,14 +272,31 @@ body {
     min-height: 100%;
   }
 
+  /* Section strip uses full screen width; arrows overlay (no side columns stealing space) */
+  #nav-marquee-row.section-marquee-bar {
+    max-width: none !important;
+    width: 100vw;
+    margin-left: calc(50% - 50vw);
+    margin-right: calc(50% - 50vw);
+    padding-left: 0;
+    padding-right: 0;
+    box-sizing: border-box;
+  }
+
   .section-nav-carousel {
-    gap: 0.2rem;
+    width: 100%;
   }
 
   .marquee-section .marquee-track a,
   .marquee-section .marquee-track span {
-    font-size: 0.7rem;
-    letter-spacing: 0.06em;
+    font-size: 0.68rem;
+    letter-spacing: 0.05em;
+  }
+
+  .section-nav-marquee-strip {
+    gap: 0.55rem;
+    padding-left: 2.45rem;
+    padding-right: 2.45rem;
   }
 
   .nav-page-links {
@@ -415,19 +444,21 @@ body {
   background: linear-gradient(-90deg, #000, transparent);
 }
 
-/* Section links row: one-line marquee + ‹ › (track moved in JS) */
+/* Section links: full-width strip + arrows overlaid on the black bar */
 .section-nav-carousel {
-  display: flex;
-  align-items: center;
-  gap: 0.3rem;
   width: 100%;
-  max-width: 100%;
+  max-width: min(92vw, 720px);
   margin: 0 auto;
 }
 
 .section-marquee-viewport {
-  flex: 1;
+  position: relative;
+  width: 100%;
   min-width: 0;
+  overflow: hidden;
+}
+
+.section-marquee-inner {
   overflow: hidden;
 }
 
@@ -435,19 +466,23 @@ body {
   display: flex;
   flex-wrap: nowrap;
   align-items: center;
-  gap: 1.25rem;
+  gap: 0.85rem;
   width: max-content;
-  padding: 0.1rem 0;
+  padding: 0.12rem 2.6rem;
+  box-sizing: border-box;
   will-change: transform;
 }
 
-.sec-nav-btn {
-  flex-shrink: 0;
-  width: 2rem;
-  height: 2rem;
+.section-marquee-viewport .sec-nav-btn {
+  position: absolute;
+  top: 50%;
+  z-index: 4;
+  width: 2.15rem;
+  height: 2.15rem;
+  margin-top: -1.075rem;
   border-radius: 50%;
-  border: 1px solid rgba(255, 255, 255, 0.4);
-  background: rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  background: rgba(0, 0, 0, 0.35);
   color: #fff;
   font-size: 1.2rem;
   line-height: 1;
@@ -456,6 +491,15 @@ body {
   align-items: center;
   justify-content: center;
   padding: 0;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
+}
+
+.section-marquee-viewport .sec-prev {
+  left: 0.35rem;
+}
+
+.section-marquee-viewport .sec-next {
+  right: 0.35rem;
 }
 
 .sec-nav-btn:active {
@@ -716,55 +760,129 @@ body {
   border-radius: 0;
 }
 
-/* Placements — horizontal marquee + prev/next (track moved via JS) */
-.placements-carousel {
-  display: flex;
-  align-items: center;
-  gap: 0.35rem;
-  margin: 0 -0.25rem;
+/* Placements — full-bleed slider; one card per view; arrows on the card */
+#placements.section-placements-wide {
+  max-width: none;
 }
 
-.plc-nav {
-  flex-shrink: 0;
-  width: 2.5rem;
-  height: 2.5rem;
+.section-placements-wide {
+  position: relative;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100vw;
+  max-width: 100vw;
+  box-sizing: border-box;
+  padding-left: 0;
+  padding-right: 0;
+  margin-left: 0;
+  margin-right: 0;
+}
+
+#placements.section-placements-wide > .h-section,
+#placements.section-placements-wide > .lead {
+  max-width: min(92vw, 840px);
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1.15rem;
+  padding-right: 1.15rem;
+}
+
+.placements-slider {
+  position: relative;
+  width: 100%;
+  margin-top: 0.35rem;
+}
+
+.placements-slider-viewport {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  touch-action: pan-y;
+}
+
+.placements-slider-track {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .placements-slider-track {
+    transition: none;
+  }
+}
+
+.plc-slide {
+  flex: 0 0 100%;
+  width: 100%;
+  min-width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  display: flex;
+  justify-content: center;
+  align-items: stretch;
+  padding: 0;
+}
+
+.placements-slider-viewport .plc-nav.plc-on-card {
+  position: absolute;
+  top: 50%;
+  z-index: 5;
+  width: 2.65rem;
+  height: 2.65rem;
+  margin-top: -1.325rem;
   border-radius: 50%;
-  border: 1px solid var(--line);
-  background: var(--card);
-  color: var(--ink);
-  font-size: 1.5rem;
+  border: none;
+  background: rgba(0, 0, 0, 0.42);
+  color: #fff;
+  font-size: 1.55rem;
   line-height: 1;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 0;
-  box-shadow: var(--shadow);
+  box-shadow: 0 2px 14px rgba(0, 0, 0, 0.25);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
 }
 
-.plc-nav:hover {
-  filter: brightness(1.05);
-  border-color: var(--muted);
+.placements-slider-viewport .plc-on-card:hover {
+  background: rgba(0, 0, 0, 0.55);
 }
 
-.placements-marquee-wrap {
-  overflow: hidden;
-  position: relative;
-  flex: 1;
-  min-width: 0;
-  background: #fff;
-  border-radius: 8px;
-  border: 1px solid #e5e5e2;
+.placements-slider-viewport .plc-prev {
+  left: 0.45rem;
 }
 
-.placements-marquee-track {
-  display: flex;
-  flex-wrap: nowrap;
-  align-items: stretch;
-  gap: 1rem;
-  width: max-content;
-  padding: 0.5rem 0.35rem;
-  will-change: transform;
+.placements-slider-viewport .plc-next {
+  right: 0.45rem;
+}
+
+.plc-slide .p-card-marquee {
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  border-radius: 0;
+  border: none;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  box-shadow: none;
+}
+
+@media (min-width: 721px) {
+  .plc-slide {
+    padding: 0 1rem;
+  }
+
+  .plc-slide .p-card-marquee {
+    max-width: min(92vw, 520px);
+    border-radius: var(--radius);
+    border: 1px solid var(--line);
+    box-shadow: var(--shadow);
+  }
 }
 
 .p-card-marquee {
