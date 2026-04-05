@@ -172,74 +172,23 @@
     }
   ],
   "industryMOU": [
-    {
-      "name": "IITH",
-      "logo": "https://www.google.com/s2/favicons?domain=iith.ac.in&sz=128"
-    },
-    {
-      "name": "Google Cloud",
-      "logo": "https://www.google.com/s2/favicons?domain=cloud.google.com&sz=128"
-    },
-    {
-      "name": "KIET Smart City Lab",
-      "logo": "https://www.google.com/s2/favicons?domain=kiet.edu.in&sz=128"
-    },
-    {
-      "name": "Toastmasters",
-      "logo": "https://www.google.com/s2/favicons?domain=toastmasters.org&sz=128"
-    },
-    {
-      "name": "KIET Robotics Lab",
-      "logo": "https://www.google.com/s2/favicons?domain=kiet.edu.in&sz=128"
-    },
-    {
-      "name": "Microsoft AICW",
-      "logo": "https://www.google.com/s2/favicons?domain=microsoft.com&sz=256"
-    },
-    {
-      "name": "Oracle Academy",
-      "logo": "https://www.google.com/s2/favicons?domain=oracle.com&sz=128"
-    },
-    {
-      "name": "OSMSEC",
-      "logo": "https://www.google.com/s2/favicons?domain=osmsec.org&sz=128"
-    },
-    {
-      "name": "Spirelab",
-      "logo": "https://www.google.com/s2/favicons?domain=spire.com&sz=128"
-    },
-    {
-      "name": "Qualcomm",
-      "logo": "https://www.google.com/s2/favicons?domain=qualcomm.com&sz=128"
-    },
-    {
-      "name": "NVIDIA",
-      "logo": "https://www.google.com/s2/favicons?domain=nvidia.com&sz=128"
-    },
-    {
-      "name": "NASSCOM",
-      "logo": "https://www.google.com/s2/favicons?domain=nasscom.in&sz=128"
-    },
-    {
-      "name": "IIT Tirupati",
-      "logo": "https://www.google.com/s2/favicons?domain=iittp.ac.in&sz=128"
-    },
-    {
-      "name": "EduSkills",
-      "logo": "https://www.google.com/s2/favicons?domain=eduskillsfoundation.org&sz=128"
-    },
-    {
-      "name": "Edunet",
-      "logo": "https://www.google.com/s2/favicons?domain=edunetfoundation.org&sz=128"
-    },
-    {
-      "name": "ICT Academy",
-      "logo": "https://www.google.com/s2/favicons?domain=ictacademy.in&sz=128"
-    },
-    {
-      "name": "Infosys Foundation",
-      "logo": "https://www.google.com/s2/favicons?domain=infosys.com&sz=128"
-    }
+    { "name": "IITH", "domain": "iith.ac.in", "logo": "https://icons.duckduckgo.com/ip3/iith.ac.in.ico" },
+    { "name": "Google Cloud", "domain": "cloud.google.com", "logo": "https://icons.duckduckgo.com/ip3/cloud.google.com.ico" },
+    { "name": "KIET Smart City Lab", "domain": "kiet.edu.in", "logo": "https://icons.duckduckgo.com/ip3/kiet.edu.in.ico" },
+    { "name": "Toastmasters", "domain": "toastmasters.org", "logo": "https://icons.duckduckgo.com/ip3/toastmasters.org.ico" },
+    { "name": "KIET Robotics Lab", "domain": "kiet.edu.in", "logo": "https://icons.duckduckgo.com/ip3/kiet.edu.in.ico" },
+    { "name": "Microsoft AICW", "domain": "microsoft.com", "logo": "https://icons.duckduckgo.com/ip3/microsoft.com.ico" },
+    { "name": "Oracle Academy", "domain": "oracle.com", "logo": "https://icons.duckduckgo.com/ip3/oracle.com.ico" },
+    { "name": "OSMSEC", "domain": "osmsec.org", "logo": "https://icons.duckduckgo.com/ip3/osmsec.org.ico" },
+    { "name": "Spirelab", "domain": "spire.com", "logo": "https://icons.duckduckgo.com/ip3/spire.com.ico" },
+    { "name": "Qualcomm", "domain": "qualcomm.com", "logo": "https://icons.duckduckgo.com/ip3/qualcomm.com.ico" },
+    { "name": "NVIDIA", "domain": "nvidia.com", "logo": "https://icons.duckduckgo.com/ip3/nvidia.com.ico" },
+    { "name": "NASSCOM", "domain": "nasscom.in", "logo": "https://icons.duckduckgo.com/ip3/nasscom.in.ico" },
+    { "name": "IIT Tirupati", "domain": "iittp.ac.in", "logo": "https://icons.duckduckgo.com/ip3/iittp.ac.in.ico" },
+    { "name": "EduSkills", "domain": "eduskillsfoundation.org", "logo": "https://icons.duckduckgo.com/ip3/eduskillsfoundation.org.ico" },
+    { "name": "Edunet", "domain": "edunetfoundation.org", "logo": "https://icons.duckduckgo.com/ip3/edunetfoundation.org.ico" },
+    { "name": "ICT Academy", "domain": "ictacademy.in", "logo": "https://icons.duckduckgo.com/ip3/ictacademy.in.ico" },
+    { "name": "Infosys Foundation", "domain": "infosys.com", "logo": "https://icons.duckduckgo.com/ip3/infosys.com.ico" }
   ],
   "visionaries": [
     {

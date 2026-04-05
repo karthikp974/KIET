@@ -527,6 +527,22 @@
     $("apply-modal").setAttribute("aria-hidden", "false");
   }
 
+  function mouFaviconFallbackUrl(domain) {
+    var d = String(domain || "")
+      .trim()
+      .replace(/^https?:\/\//i, "")
+      .split("/")[0];
+    if (!d) return "";
+    return "https://www.google.com/s2/favicons?domain=" + encodeURIComponent(d) + "&sz=128";
+  }
+
+  function mouPartnerDomain(c, logoUrl) {
+    var d = String(c.domain || "").trim();
+    if (d) return d.replace(/^https?:\/\//i, "").split("/")[0];
+    var m = String(logoUrl || "").match(/icons\.duckduckgo\.com\/ip3\/([^/]+)\.ico/i);
+    return m ? m[1] : "";
+  }
+
   function renderMOU() {
     var wrap = $("mou-rows");
     if (!wrap) return;
@@ -534,12 +550,28 @@
     var list = asArray(SITE.industryMOU);
     if (!list.length) return;
     var cell = function (c) {
+      var domain = String(c.domain || "").trim();
       var logo = String(c.logo || "").trim();
-      var img = logo
-        ? '<img class="mou-partner-logo" src="' +
+      if (!logo && domain) {
+        logo = "https://icons.duckduckgo.com/ip3/" + domain.replace(/^https?:\/\//i, "").split("/")[0] + ".ico";
+      }
+      logo = normalizeMediaUrl(logo);
+      var fb = mouFaviconFallbackUrl(mouPartnerDomain(c, logo));
+      var img;
+      if (logo) {
+        img =
+          '<img class="mou-partner-logo" src="' +
           esc(logo) +
-          '" alt="" width="96" height="96" loading="eager" decoding="async" />'
-        : '<div class="mou-partner-logo ph-empty"></div>';
+          '" alt="" width="128" height="128" loading="lazy" decoding="async"' +
+          (fb
+            ? ' data-mou-fb="' +
+              esc(fb) +
+              '" onerror="if(this.dataset.mouFb){this.onerror=null;this.src=this.dataset.mouFb;this.removeAttribute(\'data-mou-fb\');}"'
+            : "") +
+          " />";
+      } else {
+        img = '<div class="mou-partner-logo ph-empty"></div>';
+      }
       return (
         '<div class="mou-partner-cell">' +
         img +

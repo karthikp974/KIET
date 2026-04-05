@@ -243,7 +243,10 @@
         '<label>Name<input type="text" class="m-n" value="' +
         escAttr(m.name) +
         '" /></label>' +
-        '<div class="up-row"><label>Logo</label><input type="file" accept="image/*" data-upload-target="' +
+        '<label>Site domain (optional, favicon fallback)<input type="text" class="m-domain" placeholder="nvidia.com" value="' +
+        escAttr(m.domain || "") +
+        '" /></label>' +
+        '<div class="up-row"><label>Logo URL</label><input type="file" accept="image/*" data-upload-target="' +
         uid +
         '" /><input type="text" class="grow m-logo" id="' +
         uid +
@@ -422,8 +425,10 @@
       };
     });
     data.industryMOU = readList("#mou-box .block", function (w) {
+      var domEl = w.querySelector(".m-domain");
       return {
         name: w.querySelector(".m-n").value.trim(),
+        domain: domEl ? domEl.value.trim() : "",
         logo: w.querySelector(".m-logo").value.trim(),
       };
     });
