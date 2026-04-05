@@ -84,19 +84,21 @@ body {
   background-position: center;
 }
 
+/* Cover + overscan; avoid transform+scale on img (Android letterboxing). translateZ promotes layer. */
 .hero-full-bg .hero-bg-img,
 .hero-full-bg .hero-bg-video {
   position: absolute;
-  top: 50%;
-  left: 50%;
-  width: var(--hero-vw, 100vw);
-  height: var(--hero-vh, 100vh);
+  left: -1px;
+  top: -1px;
+  width: calc(100% + 2px);
+  height: calc(100% + 2px);
   max-width: none;
   object-fit: cover;
   object-position: center;
   display: block;
-  /* Extra overscan so letterboxing / safe-area gaps show photo, not #000 */
-  transform: translate(-50%, -50%) scale(1.12);
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  backface-visibility: hidden;
 }
 
 .hero-full-overlay {
@@ -140,11 +142,13 @@ body {
 }
 
 .hero-pwr {
-  color: var(--red);
+  color: #ffffff;
   display: inline-block;
-  padding: 0.15rem 0.45rem 0.15rem 0.1rem;
-  background: rgba(255, 255, 255, 0.92);
-  border-radius: 0 4px 4px 0;
+  padding: 0;
+  background: transparent;
+  border-radius: 0;
+  font-weight: 800;
+  text-shadow: 0 2px 18px rgba(0, 0, 0, 0.55);
   transform: translateY(-120vh);
   opacity: 0;
   transition: transform 0.9s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.4s ease;
@@ -188,27 +192,54 @@ body {
   font-weight: 900;
   font-size: clamp(calc(1.45rem * 1.005), calc(5vw * 1.005), calc(2.35rem * 1.005));
   line-height: 1;
+}
+
+/* Jet steel / black gradient — stat digits + ₹… package numbers only (POWER stays white with EMPOWERING) */
+.hero-digit-char.hero-mix,
+.hero-package-line .hero-mix-inline {
+  background-color: transparent;
   background-image: linear-gradient(
-    180deg,
-    #e879f9 0%,
-    #ec4899 14%,
-    #f43f5e 28%,
-    #fb923c 42%,
-    #facc15 55%,
-    #22d3ee 70%,
-    #38bdf8 84%,
-    #818cf8 100%
+    168deg,
+    #a3a3a3 0%,
+    #5a5a5a 14%,
+    #2a2a2a 32%,
+    #0a0a0a 52%,
+    #000000 62%,
+    #1c1c1c 80%,
+    #050505 100%
   );
-  background-size: 100% 160%;
+  background-size: 100% 220%;
   background-position: 50% 0;
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
   -webkit-text-fill-color: transparent;
-  -webkit-text-stroke: 1.5px rgba(255, 255, 255, 0.94);
+  /* Thin rim — thick white stroke was hiding the fill on Android (looked plain white) */
+  -webkit-text-stroke: 0.4px rgba(255, 255, 255, 0.42);
   paint-order: stroke fill;
-  filter: drop-shadow(0 2px 0 rgba(76, 29, 149, 0.5)) drop-shadow(0 5px 14px rgba(0, 0, 0, 0.55));
-  animation: hero-rainbow-shift 5.5s ease-in-out infinite;
+  filter: drop-shadow(0 2px 10px rgba(0, 0, 0, 0.95));
+  animation: hero-jet-sheen 7s ease-in-out infinite;
+}
+
+@keyframes hero-jet-sheen {
+  0%,
+  100% {
+    background-position: 50% 0%;
+  }
+  50% {
+    background-position: 50% 55%;
+  }
+}
+
+@supports not ((-webkit-background-clip: text) or (background-clip: text)) {
+  .hero-digit-char.hero-mix,
+  .hero-package-line .hero-mix-inline {
+    color: #e8e8e8 !important;
+    -webkit-text-fill-color: #e8e8e8 !important;
+    background-image: none !important;
+    -webkit-text-stroke: 0;
+    filter: drop-shadow(0 2px 10px rgba(0, 0, 0, 0.95));
+  }
 }
 
 .hero-stat-label {
@@ -254,7 +285,10 @@ body {
 @media (max-width: 720px) {
   .hero-full-bg .hero-bg-img,
   .hero-full-bg .hero-bg-video {
-    transform: translate(-50%, -50%) scale(1.18);
+    width: 128%;
+    height: 128%;
+    left: -14%;
+    top: -14%;
   }
 
   .hero-full-bg {
@@ -1875,48 +1909,6 @@ button.fab-opt {
   border-radius: 0;
 }
 
-/* POWER + package digit spans — vertical rainbow gradient + white rim */
-.hero-mix,
-.hero-pwr.hero-mix {
-  display: inline-block;
-  padding: 0;
-  border-radius: 0;
-  font-size: 100.5%;
-  /* .hero-pwr sets background:white — must clear or gradient text is invisible */
-  background-color: transparent;
-  background-image: linear-gradient(
-    180deg,
-    #e879f9 0%,
-    #ec4899 14%,
-    #f43f5e 28%,
-    #fb923c 42%,
-    #facc15 55%,
-    #22d3ee 70%,
-    #38bdf8 84%,
-    #818cf8 100%
-  );
-  background-size: 100% 160%;
-  background-position: 50% 0;
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  -webkit-text-fill-color: transparent;
-  -webkit-text-stroke: 1.65px rgba(255, 255, 255, 0.95);
-  paint-order: stroke fill;
-  filter: drop-shadow(0 2px 0 rgba(76, 29, 149, 0.5)) drop-shadow(0 5px 14px rgba(0, 0, 0, 0.55));
-  animation: hero-rainbow-shift 5.5s ease-in-out infinite;
-}
-
-@keyframes hero-rainbow-shift {
-  0%,
-  100% {
-    background-position: 50% 0%;
-  }
-  50% {
-    background-position: 50% 100%;
-  }
-}
-
 .hero-tagline {
   margin: 0.35rem 0 0;
   font-size: clamp(calc(0.82rem * 1.005), calc(2.1vw * 1.005), calc(0.98rem * 1.005));
@@ -1931,40 +1923,18 @@ button.fab-opt {
   display: inline-block;
   font-weight: 900;
   font-size: 100.5%;
-  background-image: linear-gradient(
-    180deg,
-    #e879f9 0%,
-    #ec4899 14%,
-    #f43f5e 28%,
-    #fb923c 42%,
-    #facc15 55%,
-    #22d3ee 70%,
-    #38bdf8 84%,
-    #818cf8 100%
-  );
-  background-size: 100% 160%;
-  background-position: 50% 0;
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  -webkit-text-fill-color: transparent;
-  -webkit-text-stroke: 1.4px rgba(255, 255, 255, 0.92);
-  paint-order: stroke fill;
-  filter: drop-shadow(0 2px 0 rgba(76, 29, 149, 0.45)) drop-shadow(0 4px 12px rgba(0, 0, 0, 0.5));
-  animation: hero-rainbow-shift 5.5s ease-in-out infinite;
 }
 
 .hero-package-line {
   font-weight: 700;
 }
 
-/* Larger rainbow digits in “₹ 34 Lakhs…” (numbers from applyHeroPackageLine) */
+/* Larger jet digits in “₹ 34 Lakhs…” */
 .hero-package-line .hero-mix-inline {
   font-size: clamp(1.28rem, 5.2vw, 2.05rem);
   font-weight: 900;
   line-height: 1.05;
   vertical-align: -0.06em;
-  -webkit-text-stroke: 1.65px rgba(255, 255, 255, 0.94);
 }
 
 .dual-nav {

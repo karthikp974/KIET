@@ -21,7 +21,7 @@
     return document.getElementById(id);
   }
 
-  /** Match hero height/width to the visible viewport (iOS/Android browser chrome vs 100dvh/100vh). */
+  /** Match hero box + bg media to viewport. Android Chrome: use max(inner, visualViewport) so height isn’t short → black bars. */
   function syncHeroViewportSize() {
     var root = document.documentElement;
     if (!root) return;
@@ -29,11 +29,17 @@
     var w = window.innerWidth || 0;
     try {
       if (window.visualViewport) {
-        h = window.visualViewport.height;
-        w = window.visualViewport.width;
+        var vvH = window.visualViewport.height;
+        var vvW = window.visualViewport.width;
+        h = Math.max(h, vvH);
+        w = Math.max(w, vvW);
       }
     } catch (e) {
       /* ignore */
+    }
+    if (/Android/i.test(navigator.userAgent || "")) {
+      h = Math.max(h, window.innerHeight || h);
+      w = Math.max(w, window.innerWidth || w);
     }
     if (h < 200) h = window.innerHeight || 568;
     if (w < 200) w = window.innerWidth || 320;
