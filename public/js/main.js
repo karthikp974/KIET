@@ -145,63 +145,31 @@
     requestAnimationFrame(applyPlcTransform);
   }
 
-  var secRafId = null;
-
   function stopSectionNavMarquee() {
-    if (secRafId != null) {
-      cancelAnimationFrame(secRafId);
-      secRafId = null;
-    }
     var st = $("section-marquee");
     if (st) st.style.transform = "";
   }
 
+  /** Horizontal scroll (no CSS translate loop) so labels are never cut mid-word. */
   function wireSectionNavStrip() {
     stopSectionNavMarquee();
-    var track = $("section-marquee");
+    var scroller = $("section-marquee-wrap");
     var prev = $("section-marquee-prev");
     var next = $("section-marquee-next");
-    if (!track || !track.innerHTML.trim()) return;
-
-    var offset = 0;
-    var speed = 0.22;
-    var pauseUntil = 0;
-
-    function halfW() {
-      return Math.max(1, track.scrollWidth / 2);
+    var sm = $("section-marquee");
+    if (!scroller || !sm || !sm.innerHTML.trim()) return;
+    scroller.scrollLeft = 0;
+    function step(dx) {
+      scroller.scrollBy({ left: dx, behavior: "smooth" });
     }
-
-    function tick() {
-      if (Date.now() > pauseUntil) {
-        offset += speed;
-        var h = halfW();
-        if (offset >= h) offset = 0;
-      }
-      track.style.transform = "translateX(" + -offset + "px)";
-      secRafId = requestAnimationFrame(tick);
-    }
-
-    if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      secRafId = requestAnimationFrame(tick);
-    }
-
-    function nudge(dx) {
-      pauseUntil = Date.now() + 4000;
-      var h = halfW();
-      offset += dx;
-      while (offset < 0) offset += h;
-      while (offset >= h) offset -= h;
-      track.style.transform = "translateX(" + -offset + "px)";
-    }
-
     if (prev) {
       prev.onclick = function () {
-        nudge(-200);
+        step(-200);
       };
     }
     if (next) {
       next.onclick = function () {
-        nudge(200);
+        step(200);
       };
     }
   }
@@ -365,7 +333,7 @@
         return '<a href="#/" data-sec="' + p.id + '">' + esc(p.lab) + "</a>";
       })
       .join("");
-    el.innerHTML = inner + inner;
+    el.innerHTML = inner;
     var wrap = $("section-marquee-wrap");
     if (wrap) {
       wrap.onclick = function (e) {
@@ -436,20 +404,21 @@
     var items = asArray(SITE.placements);
     function cardHtml(p, idx) {
       var af = idx < 2;
+      var meta = [p.branch, p.company, p.year]
+        .filter(function (x) {
+          return x && String(x).trim();
+        })
+        .join(" · ");
+      var pkg = p.package && String(p.package).trim() ? '<div class="plc-pkg">' + esc(p.package) + "</div>" : "";
       return (
-        '<div class="p-card-marquee"><div class="p-card-side"><h3>' +
+        '<div class="plc-card">' +
+        cardImgHtml(p.image, "plc-card-img", { lazy: !af, priority: af }) +
+        '<div class="plc-card-body"><h3>' +
         esc(p.studentName) +
-        '</h3><div class="meta">' +
-        esc(p.branch) +
-        " · " +
-        esc(p.company) +
-        " · " +
-        esc(p.year) +
-        '</div><div class="pkg">' +
-        esc(p.package) +
-        "</div></div>" +
-        cardImgHtml(p.image, "p-card-photo", { lazy: !af, priority: af }) +
-        "</div>"
+        "</h3>" +
+        (meta ? '<div class="plc-meta">' + esc(meta) + "</div>" : "") +
+        pkg +
+        "</div></div>"
       );
     }
     if (!items.length) {
