@@ -1,0 +1,14 @@
+---
+description: After code changes, commit and push automatically; do not tell the user to push.
+alwaysApply: true
+---
+
+# Git: commit and push
+
+When you finish meaningful code or config changes in this repo:
+
+1. Stage the relevant files (`git add`). Omit noisy local-only paths such as `data/analytics-events.json` unless the user explicitly wants them versioned.
+2. Commit with a short, accurate message.
+3. Run `git push origin main` (or the current branch’s tracked remote).
+
+Do **not** end by asking the user to push or telling them to run `git push` themselves—do it as part of the task when you have permission to run git commands.
