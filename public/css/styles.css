@@ -24,7 +24,6 @@
 
 html {
   scroll-behavior: smooth;
-  overflow-x: clip;
 }
 
 body {
@@ -34,11 +33,6 @@ body {
   background: var(--bg);
   line-height: 1.55;
   font-size: 1.02rem;
-  overflow-x: clip;
-}
-
-#app {
-  overflow-x: clip;
 }
 
 .sr-only {
@@ -76,7 +70,7 @@ body {
   position: relative;
   min-height: 72vh;
   min-height: 72dvh;
-  background: #1a1a1a;
+  background: #141414;
   overflow: hidden;
 }
 
@@ -250,47 +244,18 @@ body {
 }
 
 @media (max-width: 720px) {
+  /* Full-viewport hero on phones so the photo fills the screen (no letterboxing bands) */
   .hero-full {
     min-height: 100svh;
     min-height: 100dvh;
     min-height: -webkit-fill-available;
+    height: 100svh;
+    height: 100dvh;
+    height: -webkit-fill-available;
   }
 
-  /* Pull nav onto hero so the first screen is mostly photo, not a solid black bar */
-  #dual-nav {
-    margin-top: -3.25rem;
-    position: relative;
-    z-index: 55;
-    background: transparent;
-    border-bottom: none;
-    box-shadow: none;
-  }
-
-  #dual-nav .dual-nav-sections-wrap.section-marquee-bar {
-    background: rgba(0, 0, 0, 0.52);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
-    border-radius: 14px 14px 0 0;
-    margin-left: auto;
-    margin-right: auto;
-    max-width: min(calc(100vw - 1rem), 720px);
-    box-shadow: 0 6px 28px rgba(0, 0, 0, 0.22);
-  }
-
-  #dual-nav .nav-pages-bar {
-    background: #fff;
-    border: 1px solid var(--line);
-    border-top: 1px solid rgba(0, 0, 0, 0.06);
-    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.1);
-  }
-
-  /* After scroll, section marquee hides — restore solid bar so content doesn’t show through */
-  #dual-nav:has(#nav-marquee-row.marquee-scrolled-out) {
-    margin-top: 0;
-    background: var(--bg);
-    border-bottom: 1px solid var(--line);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+  .hero-full-bg {
+    min-height: 100%;
   }
 }
 
@@ -305,7 +270,7 @@ body {
 .dual-nav {
   position: sticky;
   top: 0;
-  z-index: 50;
+  z-index: 100;
   background: var(--bg);
   border-bottom: 1px solid var(--line);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
@@ -413,23 +378,7 @@ body {
   background: linear-gradient(-90deg, #000, transparent);
 }
 
-/* Gentle rotate sway (replaces horizontal scroll marquee) */
-@keyframes kiet-rotate-sway {
-  0%,
-  100% {
-    transform: rotate(-2.75deg);
-  }
-  50% {
-    transform: rotate(2.75deg);
-  }
-}
-
-.kiet-rotate-sway {
-  animation: kiet-rotate-sway 16s ease-in-out infinite;
-  transform-origin: 50% 50%;
-}
-
-.section-nav-track.kiet-rotate-sway {
+.section-nav-track {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
@@ -438,13 +387,6 @@ body {
   width: 100%;
   max-width: 100%;
   padding: 0.2rem 0;
-  animation-duration: 15s;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .kiet-rotate-sway {
-    animation: none !important;
-  }
 }
 
 .marquee-section .marquee-track a,
@@ -701,34 +643,55 @@ body {
   border-radius: 0;
 }
 
-/* Placements marquee */
+/* Placements — horizontal marquee + prev/next (track moved via JS) */
+.placements-carousel {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin: 0 -0.25rem;
+}
+
+.plc-nav {
+  flex-shrink: 0;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  background: var(--card);
+  color: var(--ink);
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  box-shadow: var(--shadow);
+}
+
+.plc-nav:hover {
+  filter: brightness(1.05);
+  border-color: var(--muted);
+}
+
 .placements-marquee-wrap {
   overflow: hidden;
   position: relative;
-  margin: 0 -0.25rem;
+  flex: 1;
+  min-width: 0;
   background: #fff;
   border-radius: 8px;
   border: 1px solid #e5e5e2;
-  transform-style: preserve-3d;
 }
 
 .placements-marquee-track {
   display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
+  flex-wrap: nowrap;
   align-items: stretch;
   gap: 1rem;
-  width: 100%;
-  max-width: 100%;
-  padding: 0.5rem 0;
-}
-
-.placements-marquee-track.kiet-rotate-sway {
-  animation-duration: 18s;
-}
-
-.placements-marquee-wrap:hover .placements-marquee-track {
-  animation-play-state: paused;
+  width: max-content;
+  padding: 0.5rem 0.35rem;
+  will-change: transform;
 }
 
 .p-card-marquee {
@@ -928,17 +891,15 @@ body {
   cursor: not-allowed;
 }
 
-/* MOU — partner logos (rotate sway, no scroll marquee) */
+/* MOU — partner logos (static grid, no motion) */
 .mou-partners-root {
   margin: 0;
   padding: 0;
 }
 
 .mou-partners-marquee {
-  overflow: hidden;
   position: relative;
   padding: 0.35rem 0 0.65rem;
-  transform-style: preserve-3d;
 }
 
 .mou-partners-track {
@@ -950,14 +911,6 @@ body {
   width: 100%;
   max-width: 100%;
   padding: 0.25rem 0;
-}
-
-.mou-partners-marquee:hover .mou-partners-track {
-  animation-play-state: paused;
-}
-
-.mou-partners-track.kiet-rotate-sway {
-  animation-duration: 21s;
 }
 
 .mou-partner-cell {

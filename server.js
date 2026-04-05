@@ -89,14 +89,25 @@ async function optimizeRasterUpload(absPath, mimetype) {
   }
 }
 
+function extFromMimetype(mimetype) {
+  const m = String(mimetype || "").toLowerCase();
+  if (m === "image/jpeg" || m === "image/jpg") return ".jpg";
+  if (m === "image/png") return ".png";
+  if (m === "image/webp") return ".webp";
+  if (m === "image/gif") return ".gif";
+  if (m.startsWith("video/")) return ".mp4";
+  return ".jpg";
+}
+
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, UPLOADS);
   },
   filename: function (req, file, cb) {
-    const ext = path.extname(file.originalname || "") || "";
+    let ext = path.extname(file.originalname || "").toLowerCase();
+    if (!ext && file.mimetype) ext = extFromMimetype(file.mimetype);
     const base = "f-" + Date.now() + "-" + Math.random().toString(36).slice(2, 8);
-    cb(null, base + ext.toLowerCase());
+    cb(null, base + ext);
   },
 });
 
@@ -396,6 +407,11 @@ app.post("/api/upload", requireFullAdmin, upload.single("file"), async (req, res
   try {
     const optimized = await optimizeRasterUpload(req.file.path, req.file.mimetype);
     if (optimized) filename = path.basename(optimized);
+    else if (req.file.mimetype && String(req.file.mimetype).startsWith("image/") && !path.extname(filename)) {
+      const withExt = path.join(path.dirname(req.file.path), filename + extFromMimetype(req.file.mimetype));
+      await fs.promises.rename(req.file.path, withExt).catch(() => {});
+      filename = path.basename(withExt);
+    }
   } catch (e) {
     console.error("upload optimize", e);
   }

@@ -571,3 +571,18 @@ textarea.code {
 .export-fmt-cancel {
   width: 100%;
 }
+
+.gal-row {
+  margin: 0.35rem 0 0.5rem;
+}
+.gal-file-label {
+  display: block;
+  font-weight: 600;
+  font-size: 0.88rem;
+}
+.gal-file-label input[type="file"] {
+  display: block;
+  margin-top: 0.25rem;
+  max-width: 100%;
+  font: inherit;
+}

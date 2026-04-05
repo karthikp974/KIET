@@ -31,15 +31,25 @@
     return s ? "url(" + JSON.stringify(s) + ")" : "none";
   }
 
+  /** Broken admin saves sometimes store /uploads/f-<timestamp> with no extension — browsers 404. */
+  function normalizeMediaUrl(u) {
+    var s = String(u || "").trim();
+    if (!s) return s;
+    if (/^\/uploads\/f-\d+$/i.test(s)) return s + ".jpg";
+    return s;
+  }
+
   /**
    * opts.lazy false = eager (above-the-fold). opts.priority = fetchpriority high.
    */
   function cardImgHtml(url, wrapClass, opts) {
     opts = opts || {};
-    var u = String(url || "").trim();
+    var u = normalizeMediaUrl(String(url || "").trim());
     if (!u) return '<div class="' + wrapClass + ' ph-empty"></div>';
     var loadAttr = opts.lazy === false ? ' loading="eager"' : ' loading="lazy"';
     var fpAttr = opts.priority ? ' fetchpriority="high"' : "";
+    var err =
+      "this.onerror=null;var p=this.parentElement;if(p){p.classList.add('ph-empty');}this.remove();";
     return (
       '<div class="' +
       wrapClass +
@@ -48,8 +58,86 @@
       '" alt="" decoding="async"' +
       loadAttr +
       fpAttr +
-      " /></div>"
+      ' onerror="' +
+      err +
+      '" /></div>'
     );
+  }
+
+  var plcRafId = null;
+
+  function stopPlacementsMarquee() {
+    if (plcRafId != null) {
+      cancelAnimationFrame(plcRafId);
+      plcRafId = null;
+    }
+  }
+
+  /** Duplicated strip + slow translate marquee; prev/next nudge and briefly pause auto-scroll. */
+  function wirePlacementsStrip() {
+    stopPlacementsMarquee();
+    var carousel = $("placements-carousel");
+    var track = $("placements-list");
+    var prev = $("placements-prev");
+    var next = $("placements-next");
+    if (!carousel || !track) return;
+
+    var items = asArray(SITE.placements);
+    if (!items.length) {
+      carousel.classList.add("hidden");
+      return;
+    }
+    carousel.classList.remove("hidden");
+
+    var html = track.innerHTML;
+    if (!html) {
+      carousel.classList.add("hidden");
+      return;
+    }
+    track.innerHTML = html + html;
+
+    var offset = 0;
+    var speed = 0.35;
+    var pauseUntil = 0;
+
+    function halfW() {
+      return Math.max(1, track.scrollWidth / 2);
+    }
+
+    function tick() {
+      if (Date.now() > pauseUntil) {
+        offset += speed;
+        var h = halfW();
+        if (offset >= h) offset = 0;
+      }
+      track.style.transform = "translateX(" + -offset + "px)";
+      plcRafId = requestAnimationFrame(tick);
+    }
+
+    if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      plcRafId = requestAnimationFrame(tick);
+    }
+
+    function nudge(dx) {
+      pauseUntil = Date.now() + 4500;
+      var h = halfW();
+      offset += dx;
+      while (offset < 0) offset += h;
+      while (offset >= h) offset -= h;
+      track.style.transform = "translateX(" + -offset + "px)";
+    }
+
+    if (prev) {
+      prev.onclick = function () {
+        nudge(-280);
+      };
+    }
+    if (next) {
+      next.onclick = function () {
+        nudge(280);
+      };
+    }
+
   }
 
   function track(type, section, payload) {
@@ -67,8 +155,9 @@
 
   function mediaHtml(url) {
     if (!url) return "";
-    if (isVideoUrl(url)) return "<video controls playsinline src=\"" + esc(url) + "\"></video>";
-    return "<img src=\"" + esc(url) + "\" alt=\"\" loading=\"eager\" decoding=\"async\" fetchpriority=\"auto\" />";
+    var u = normalizeMediaUrl(String(url).trim());
+    if (isVideoUrl(u)) return "<video controls playsinline src=\"" + esc(u) + "\"></video>";
+    return "<img src=\"" + esc(u) + "\" alt=\"\" loading=\"eager\" decoding=\"async\" fetchpriority=\"auto\" />";
   }
 
   function closeApply() {
@@ -285,7 +374,9 @@
   }
 
   function renderPlacements() {
+    stopPlacementsMarquee();
     var root = $("placements-list");
+    if (root) root.style.transform = "";
     root.innerHTML = "";
     var items = asArray(SITE.placements);
     function cardHtml(p, idx) {
@@ -311,8 +402,13 @@
         return cardHtml(p, idx);
       })
       .join("");
-    if (!html) return;
+    if (!html) {
+      var car = $("placements-carousel");
+      if (car) car.classList.add("hidden");
+      return;
+    }
     root.innerHTML = html;
+    wirePlacementsStrip();
   }
 
   var currentStream = null;
@@ -405,7 +501,7 @@
     var row = list.map(cell).join("");
     var outer = document.createElement("div");
     outer.className = "mou-partners-marquee";
-    outer.innerHTML = '<div class="mou-partners-track kiet-rotate-sway">' + row + "</div>";
+    outer.innerHTML = '<div class="mou-partners-track">' + row + "</div>";
     wrap.appendChild(outer);
   }
 
@@ -1010,9 +1106,16 @@
 
     var hero = SITE.hero || {};
     var hbg = $("hero-bg");
-    var hi = hero.image ? String(hero.image).trim() : "";
+    var hi = normalizeMediaUrl(hero.image ? String(hero.image).trim() : "");
     hbg.innerHTML = "";
     hbg.style.backgroundImage = "none";
+    if (hi && !isVideoUrl(hi)) {
+      var pre = document.createElement("link");
+      pre.rel = "preload";
+      pre.as = "image";
+      pre.href = hi;
+      document.head.appendChild(pre);
+    }
     if (hi) {
       if (isVideoUrl(hi)) {
         var vid = document.createElement("video");
@@ -1034,6 +1137,10 @@
         im.loading = "eager";
         im.setAttribute("fetchpriority", "high");
         im.setAttribute("aria-hidden", "true");
+        im.onerror = function () {
+          im.onerror = null;
+          im.style.display = "none";
+        };
         hbg.appendChild(im);
       }
     }

@@ -54,6 +54,32 @@
       });
   });
 
+  document.addEventListener("change", function (e) {
+    var t = e.target;
+    if (!(t && t.matches && t.matches("input[data-gallery-for]"))) return;
+    var tid = t.getAttribute("data-gallery-for");
+    var ta = document.getElementById(tid);
+    if (!t.files || !t.files.length || !ta) return;
+    if (adminRole !== "full") {
+      t.value = "";
+      alert("Uploads require the full admin password.");
+      return;
+    }
+    var files = Array.prototype.slice.call(t.files);
+    t.value = "";
+    (async function () {
+      try {
+        for (var i = 0; i < files.length; i++) {
+          var url = await apiUpload(files[i]);
+          var cur = ta.value.trim();
+          ta.value = cur ? cur + "\n" + url : url;
+        }
+      } catch (err) {
+        alert("Gallery upload failed — are you signed in as full admin?");
+      }
+    })();
+  });
+
   function showLogin() {
     adminRole = null;
     selectedChatSession = null;
@@ -134,6 +160,7 @@
   function campusBlock(ev) {
     var uid = "ci-" + Math.random().toString(36).slice(2);
     var uidDetail = "cid-" + Math.random().toString(36).slice(2);
+    var gid = "cg-" + Math.random().toString(36).slice(2);
     var w = block(
       "<h3>Campus event</h3>" +
         '<label>Title<input type="text" class="c-title" value="' +
@@ -160,7 +187,12 @@
         '<label>Long text (modal)<textarea class="c-body" rows="3">' +
         escText(ev.body) +
         "</textarea></label>" +
-        '<label>Gallery URLs (one per line)<textarea class="c-gal" rows="2">' +
+        '<div class="gal-row"><label class="gal-file-label">Gallery — add photos (multi)<input type="file" accept="image/*" multiple data-gallery-for="' +
+        gid +
+        '" /></label></div>' +
+        '<label>Gallery URLs (one per line; uploads append here)<textarea class="c-gal" id="' +
+        gid +
+        '" rows="3">' +
         escText((ev.gallery || []).join("\n")) +
         "</textarea></label>",
       null
@@ -275,6 +307,7 @@
   }
 
   function diffBlock(d) {
+    var dgid = "dg-" + Math.random().toString(36).slice(2);
     var w = block(
       "<h3>Difference item</h3>" +
         '<label>Title (e.g. KIOT)<input type="text" class="d-t" value="' +
@@ -286,7 +319,12 @@
         '<label>Full text<textarea class="d-b" rows="3">' +
         escText(d.body) +
         "</textarea></label>" +
-        '<label>Gallery URLs (one per line)<textarea class="d-g" rows="2">' +
+        '<div class="gal-row"><label class="gal-file-label">Gallery — add photos (multi)<input type="file" accept="image/*" multiple data-gallery-for="' +
+        dgid +
+        '" /></label></div>' +
+        '<label>Gallery URLs (one per line; uploads append here)<textarea class="d-g" id="' +
+        dgid +
+        '" rows="3">' +
         escText((d.gallery || []).join("\n")) +
         "</textarea></label>",
       null
