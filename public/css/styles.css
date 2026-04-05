@@ -194,51 +194,41 @@ body {
   line-height: 1;
 }
 
-/* VIBGYOR-style rainbow on stat digits + ₹… package numbers only (POWER stays white) */
+/* Hero stats: yellow → sky blue → pink → red → blue (horizontal sweep; POWER stays white) */
 .hero-digit-char.hero-mix,
 .hero-package-line .hero-mix-inline {
   background-color: transparent;
   background-image: linear-gradient(
-    180deg,
-    #8b5cf6 0%,
-    #6366f1 14%,
-    #2563eb 28%,
-    #16a34a 42%,
-    #ca8a04 55%,
-    #ea580c 70%,
-    #dc2626 84%,
-    #9333ea 100%
+    90deg,
+    #fde047 0%,
+    #facc15 12%,
+    #38bdf8 28%,
+    #7dd3fc 36%,
+    #f472b6 52%,
+    #ec4899 58%,
+    #ef4444 72%,
+    #2563eb 88%,
+    #3b82f6 94%,
+    #fde047 100%
   );
-  background-size: 100% 200%;
-  background-position: 50% 0;
+  background-size: 280% 100%;
+  background-position: 0% 50%;
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
   -webkit-text-fill-color: transparent;
-  -webkit-text-stroke: 0.45px rgba(255, 255, 255, 0.5);
+  -webkit-text-stroke: 0.35px rgba(255, 255, 255, 0.55);
   paint-order: stroke fill;
-  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.75));
-  animation: hero-vibgyor-shift 5s ease-in-out infinite;
+  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.65));
+  animation: hero-stat-rainbow 5s linear infinite;
 }
 
-@keyframes hero-vibgyor-shift {
-  0%,
+@keyframes hero-stat-rainbow {
+  0% {
+    background-position: 0% 50%;
+  }
   100% {
-    background-position: 50% 0%;
-  }
-  50% {
-    background-position: 50% 100%;
-  }
-}
-
-@supports not ((-webkit-background-clip: text) or (background-clip: text)) {
-  .hero-digit-char.hero-mix,
-  .hero-package-line .hero-mix-inline {
-    color: #e8e8e8 !important;
-    -webkit-text-fill-color: #e8e8e8 !important;
-    background-image: none !important;
-    -webkit-text-stroke: 0;
-    filter: drop-shadow(0 2px 10px rgba(0, 0, 0, 0.95));
+    background-position: 100% 50%;
   }
 }
 
