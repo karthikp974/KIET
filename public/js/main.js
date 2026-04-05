@@ -21,6 +21,26 @@
     return document.getElementById(id);
   }
 
+  /** Match hero height/width to the visible viewport (iOS/Android browser chrome vs 100dvh/100vh). */
+  function syncHeroViewportSize() {
+    var root = document.documentElement;
+    if (!root) return;
+    var h = window.innerHeight || 0;
+    var w = window.innerWidth || 0;
+    try {
+      if (window.visualViewport) {
+        h = window.visualViewport.height;
+        w = window.visualViewport.width;
+      }
+    } catch (e) {
+      /* ignore */
+    }
+    if (h < 200) h = window.innerHeight || 568;
+    if (w < 200) w = window.innerWidth || 320;
+    root.style.setProperty("--hero-vh", h + "px");
+    root.style.setProperty("--hero-vw", w + "px");
+  }
+
   function esc(t) {
     var d = document.createElement("div");
     d.textContent = t == null ? "" : String(t);
@@ -1145,6 +1165,7 @@
 
   function init(data) {
     SITE = data;
+    syncHeroViewportSize();
     document.title = (SITE.shortName || "KIET") + " — " + (SITE.collegeName || "");
     loadPixels(SITE.pixels || {});
 
@@ -1246,4 +1267,15 @@
       document.body.innerHTML =
         "<p style=\"padding:2rem;color:#fff;background:#111;\">Could not load site content. Deploy the API (Railway) and set <code>vercel.json</code> rewrites to that URL, or run locally: <code>npm start</code></p>";
     });
+
+  syncHeroViewportSize();
+  window.addEventListener("resize", syncHeroViewportSize);
+  window.addEventListener("orientationchange", syncHeroViewportSize);
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener("resize", syncHeroViewportSize);
+    window.visualViewport.addEventListener("scroll", syncHeroViewportSize);
+  }
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", syncHeroViewportSize);
+  }
 })();
