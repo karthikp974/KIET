@@ -332,6 +332,7 @@ app.get("/api/me", (req, res) => {
 /** Defaults from repo when DB lists are empty (accidental save). */
 let bundledProgramStreams = [];
 let bundledIndustryMOU = [];
+let bundledClubs = [];
 try {
   const rawBundled = fs.readFileSync(path.join(PUBLIC, "data", "site.json"), "utf8");
   const bundledSite = JSON.parse(rawBundled);
@@ -341,8 +342,25 @@ try {
   if (Array.isArray(bundledSite.industryMOU) && bundledSite.industryMOU.length) {
     bundledIndustryMOU = bundledSite.industryMOU;
   }
+  if (Array.isArray(bundledSite.clubs) && bundledSite.clubs.length) {
+    bundledClubs = bundledSite.clubs;
+  }
 } catch (e) {
   console.warn("Bundled site.json defaults not loaded:", e && e.message ? e.message : e);
+}
+
+/** DB sometimes has junk rows or visionaries pasted into clubs; fall back to repo defaults. */
+function clubListNeedsBundledFallback(arr) {
+  if (!Array.isArray(arr) || arr.length === 0) return true;
+  if (bundledClubs.length >= 5 && arr.length <= 2) return true;
+  for (let i = 0; i < arr.length; i++) {
+    const c = arr[i];
+    if (!c || typeof c !== "object") return true;
+    if (c.name && !c.title) return true;
+    const t = String(c.title != null ? c.title : "").trim();
+    if (t.length < 4) return true;
+  }
+  return false;
 }
 
 /** Avoid blank public pages when site JSON lists are stored as wrong type (e.g. programStreams as {}). */
@@ -370,6 +388,9 @@ function sanitizeSiteForClient(data) {
     if (bundledIndustryMOU.length) {
       o.industryMOU = JSON.parse(JSON.stringify(bundledIndustryMOU));
     }
+  }
+  if (bundledClubs.length && clubListNeedsBundledFallback(o.clubs)) {
+    o.clubs = JSON.parse(JSON.stringify(bundledClubs));
   }
   return o;
 }
