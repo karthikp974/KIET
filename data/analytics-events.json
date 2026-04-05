@@ -3396,5 +3396,25 @@
     "payload": {},
     "ip": "::1",
     "ua": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36 Edg/146.0.0.0"
+  },
+  {
+    "id": "a-1775374619108-zd0m0",
+    "at": "2026-04-05T07:36:59.109Z",
+    "type": "route",
+    "sessionId": "s-1775322014769-r8wzkxhl95",
+    "section": "home",
+    "payload": {},
+    "ip": "::1",
+    "ua": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36 Edg/146.0.0.0"
+  },
+  {
+    "id": "a-1775374909841-5ix3j",
+    "at": "2026-04-05T07:41:49.842Z",
+    "type": "section_view",
+    "sessionId": "s-1775322014769-r8wzkxhl95",
+    "section": "spotlight",
+    "payload": {},
+    "ip": "::1",
+    "ua": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36 Edg/146.0.0.0"
   }
 ]
